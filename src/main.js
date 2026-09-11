@@ -3,7 +3,7 @@ import './style.css';
 const API_KEY = import.meta.env.VITE_NASA_API_KEY;
 
 // ==========================================
-// 1. CLOCK LOGIC (24H DIGITAL & ANALOG IPHONE)
+// 1. CLOCK LOGIC
 // ==========================================
 const digitalClockEl = document.querySelector("#digital-clock");
 const analogClockEl = document.querySelector("#analog-clock");
@@ -72,7 +72,7 @@ setInterval(updateClocks, 1000);
 updateClocks();
 
 // ==========================================
-// 2. WALLPAPER SYSTEM (REVERTS TO USER WALLPAPER)
+// 2. WALLPAPER SYSTEM
 // ==========================================
 const wallpaperInput = document.querySelector("#wallpaper-input");
 const uploadBtn = document.querySelector("#btn-upload-wallpaper");
@@ -134,7 +134,7 @@ function compressAndSaveImage(file) {
         autoSpaceToggle.checked = false;
         localStorage.setItem("tab_auto_space", "false");
       } catch (err) {
-        alert("Image is still too large for localStorage quota. Try a smaller file.");
+        alert("Image is too large for storage. Please try a smaller file.");
       }
     };
     img.src = e.target.result;
@@ -167,7 +167,6 @@ autoSpaceToggle.addEventListener("change", (e) => {
       applyWallpaper(currentSpaceImageUrl);
     }
   } else {
-    // Return back to user's uploaded wallpaper
     const userWallpaper = localStorage.getItem("tab_uploaded_wallpaper");
     applyWallpaper(userWallpaper);
   }
@@ -214,20 +213,17 @@ function renderNoteElement(note) {
   const textarea = noteEl.querySelector("textarea");
   const deleteBtn = noteEl.querySelector(".btn-delete-note");
 
-  // Delete note
   deleteBtn.addEventListener("click", () => {
     notes = notes.filter(n => n.id !== note.id);
     saveNotes();
     noteEl.remove();
   });
 
-  // Save text changes
   textarea.addEventListener("input", (e) => {
     note.text = e.target.value;
     saveNotes();
   });
 
-  // Pointer dragging logic
   let isDragging = false;
   let startX = 0;
   let startY = 0;
@@ -297,13 +293,12 @@ function renderAllNotes() {
   notes.forEach(note => renderNoteElement(note));
 }
 
-addNoteBtn.addEventListener("click", () => {
-  // Cascading offset for newly spawned notes
+function createNewStickyNote() {
   const offset = (notes.length % 6) * 28;
   const newNote = {
     id: Date.now().toString(),
     text: "",
-    x: Math.max(20, window.innerWidth - 330 - offset),
+    x: Math.max(20, window.innerWidth - 320 - offset),
     y: Math.max(80, 80 + offset)
   };
 
@@ -311,15 +306,243 @@ addNoteBtn.addEventListener("click", () => {
   saveNotes();
   renderNoteElement(newNote);
 
-  // Focus textarea in newly added note
   const newlyCreated = notesContainer.querySelector(`[data-id="${newNote.id}"] textarea`);
   if (newlyCreated) newlyCreated.focus();
-});
+}
 
+addNoteBtn.addEventListener("click", createNewStickyNote);
 renderAllNotes();
 
 // ==========================================
-// 4. 5 SHORTCUTS (GITHUB, REDDIT, YOUTUBE DEFAULT)
+// 4. FRIENDLY CALENDAR & GOOGLE IMPORT
+// ==========================================
+const calendarModal = document.querySelector("#calendar-modal");
+const btnCloseCalendar = document.querySelector("#btn-close-calendar");
+const calendarMonthTitle = document.querySelector("#calendar-month-title");
+const calendarDaysGrid = document.querySelector("#calendar-days-grid");
+const btnPrevMonth = document.querySelector("#btn-prev-month");
+const btnNextMonth = document.querySelector("#btn-next-month");
+
+const selectedDayLabel = document.querySelector("#selected-day-label");
+const btnAddEventToggle = document.querySelector("#btn-add-event-toggle");
+const eventForm = document.querySelector("#event-form");
+const eventTitleInput = document.querySelector("#event-title-input");
+const eventTimeInput = document.querySelector("#event-time-input");
+const btnCancelEvent = document.querySelector("#btn-cancel-event");
+const eventsContainer = document.querySelector("#events-container");
+
+const gcalToggle = document.querySelector("#gcal-toggle");
+const gcalPanel = document.querySelector("#gcal-panel");
+const gcalFileInput = document.querySelector("#gcal-file-input");
+const gcalStatus = document.querySelector("#gcal-status");
+
+let calendarDate = new Date();
+let selectedDateStr = new Date().toISOString().split("T")[0];
+let calendarEvents = JSON.parse(localStorage.getItem("tab_calendar_events")) || {};
+
+function saveCalendarEvents() {
+  localStorage.setItem("tab_calendar_events", JSON.stringify(calendarEvents));
+}
+
+function openCalendar() {
+  calendarModal.classList.remove("hidden");
+  renderCalendar();
+  renderSelectedDayEvents();
+}
+
+digitalDate.addEventListener("click", openCalendar);
+analogDate.addEventListener("click", openCalendar);
+btnCloseCalendar.addEventListener("click", () => calendarModal.classList.add("hidden"));
+
+gcalToggle.addEventListener("click", () => {
+  gcalPanel.classList.toggle("hidden");
+});
+
+btnPrevMonth.addEventListener("click", () => {
+  calendarDate.setMonth(calendarDate.getMonth() - 1);
+  renderCalendar();
+});
+
+btnNextMonth.addEventListener("click", () => {
+  calendarDate.setMonth(calendarDate.getMonth() + 1);
+  renderCalendar();
+});
+
+function renderCalendar() {
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+
+  calendarMonthTitle.textContent = calendarDate.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric"
+  });
+
+  calendarDaysGrid.innerHTML = "";
+
+  const firstDayIndex = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  for (let i = 0; i < firstDayIndex; i++) {
+    const emptyCell = document.createElement("div");
+    emptyCell.className = "cal-day empty";
+    calendarDaysGrid.appendChild(emptyCell);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayCell = document.createElement("div");
+    dayCell.className = "cal-day";
+    dayCell.textContent = d;
+
+    const currentDayStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+    if (currentDayStr === todayStr) dayCell.classList.add("today");
+    if (currentDayStr === selectedDateStr) dayCell.classList.add("selected");
+
+    if (calendarEvents[currentDayStr] && calendarEvents[currentDayStr].length > 0) {
+      const dot = document.createElement("div");
+      dot.className = "has-events-dot";
+      dayCell.appendChild(dot);
+    }
+
+    dayCell.addEventListener("click", () => {
+      selectedDateStr = currentDayStr;
+      document.querySelectorAll(".cal-day").forEach(c => c.classList.remove("selected"));
+      dayCell.classList.add("selected");
+      renderSelectedDayEvents();
+    });
+
+    calendarDaysGrid.appendChild(dayCell);
+  }
+}
+
+function renderSelectedDayEvents() {
+  const dObj = new Date(selectedDateStr + "T00:00:00");
+  selectedDayLabel.textContent = `Events for ${dObj.toLocaleDateString(undefined, { month: "short", day: "numeric", weekday: "short" })}`;
+
+  const dayEvents = calendarEvents[selectedDateStr] || [];
+  eventsContainer.innerHTML = "";
+
+  if (dayEvents.length === 0) {
+    eventsContainer.innerHTML = `<p class="no-events-msg">No events scheduled for this day.</p>`;
+    return;
+  }
+
+  dayEvents.forEach((ev, idx) => {
+    const row = document.createElement("div");
+    row.className = "event-row";
+    row.innerHTML = `
+      <div class="event-info">
+        <span class="event-time">${ev.time || "All Day"}</span>
+        <span class="event-title">${ev.title}</span>
+      </div>
+      <button class="btn-del-event" type="button" title="Delete event">✕</button>
+    `;
+
+    row.querySelector(".btn-del-event").addEventListener("click", () => {
+      calendarEvents[selectedDateStr].splice(idx, 1);
+      if (calendarEvents[selectedDateStr].length === 0) {
+        delete calendarEvents[selectedDateStr];
+      }
+      saveCalendarEvents();
+      renderCalendar();
+      renderSelectedDayEvents();
+    });
+
+    eventsContainer.appendChild(row);
+  });
+}
+
+btnAddEventToggle.addEventListener("click", () => {
+  eventForm.classList.toggle("hidden");
+  eventTitleInput.focus();
+});
+
+btnCancelEvent.addEventListener("click", () => {
+  eventForm.classList.add("hidden");
+  eventTitleInput.value = "";
+  eventTimeInput.value = "";
+});
+
+eventForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const title = eventTitleInput.value.trim();
+  const time = eventTimeInput.value;
+
+  if (!title) return;
+
+  if (!calendarEvents[selectedDateStr]) {
+    calendarEvents[selectedDateStr] = [];
+  }
+
+  calendarEvents[selectedDateStr].push({ title, time });
+  saveCalendarEvents();
+
+  eventTitleInput.value = "";
+  eventTimeInput.value = "";
+  eventForm.classList.add("hidden");
+
+  renderCalendar();
+  renderSelectedDayEvents();
+});
+
+function parseICSData(icsText) {
+  const lines = icsText.split(/\r\n|\n|\r/);
+  let inEvent = false;
+  let currentEvent = {};
+  let count = 0;
+
+  for (let line of lines) {
+    if (line.startsWith("BEGIN:VEVENT")) {
+      inEvent = true;
+      currentEvent = {};
+    } else if (line.startsWith("END:VEVENT")) {
+      inEvent = false;
+      if (currentEvent.title && currentEvent.date) {
+        if (!calendarEvents[currentEvent.date]) {
+          calendarEvents[currentEvent.date] = [];
+        }
+        calendarEvents[currentEvent.date].push({
+          title: currentEvent.title,
+          time: currentEvent.time || "All Day"
+        });
+        count++;
+      }
+    } else if (inEvent) {
+      if (line.startsWith("SUMMARY:")) {
+        currentEvent.title = line.replace("SUMMARY:", "").trim();
+      } else if (line.startsWith("DTSTART")) {
+        const val = line.split(":")[1];
+        if (val && val.length >= 8) {
+          const y = val.substring(0, 4);
+          const m = val.substring(4, 6);
+          const d = val.substring(6, 8);
+          currentEvent.date = `${y}-${m}-${d}`;
+          if (val.includes("T") && val.length >= 13) {
+            currentEvent.time = `${val.substring(9, 11)}:${val.substring(11, 13)}`;
+          }
+        }
+      }
+    }
+  }
+
+  saveCalendarEvents();
+  renderCalendar();
+  renderSelectedDayEvents();
+  gcalStatus.textContent = `✓ Successfully imported ${count} events!`;
+}
+
+// Upload step for the friendly 2-step process
+gcalFileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => parseICSData(evt.target.result);
+  reader.readAsText(file);
+});
+
+// ==========================================
+// 5. SHORTCUTS (1: GITHUB, 2: REDDIT, 3: YOUTUBE)
 // ==========================================
 const DEFAULT_SHORTCUTS = [
   { name: "GitHub", url: "https://github.com" },
@@ -330,8 +553,9 @@ const DEFAULT_SHORTCUTS = [
 ];
 
 let shortcuts = JSON.parse(localStorage.getItem("tab_shortcuts"));
-if (!shortcuts || shortcuts.length !== 5) {
+if (!shortcuts || !Array.isArray(shortcuts) || shortcuts.length !== 5) {
   shortcuts = DEFAULT_SHORTCUTS;
+  localStorage.setItem("tab_shortcuts", JSON.stringify(shortcuts));
 }
 
 const shortcutsGrid = document.querySelector("#shortcuts-grid");
@@ -524,13 +748,16 @@ modalOverlay.addEventListener("click", (e) => {
 renderShortcuts();
 
 // ==========================================
-// 5. UNIFIED BOTTOM DOCK (SPOTIFY & SPACE PHOTO)
+// 6. BOTTOM DOCK (SPOTIFY, NASA, NEWS)
 // ==========================================
 const bottomDock = document.querySelector("#bottom-dock");
 const tabBtnSpotify = document.querySelector("#tab-btn-spotify");
 const tabBtnSpace = document.querySelector("#tab-btn-space");
+const tabBtnNews = document.querySelector("#tab-btn-news");
+
 const panelSpotify = document.querySelector("#panel-spotify");
 const panelSpace = document.querySelector("#panel-space");
+const panelNews = document.querySelector("#panel-news");
 const drawerBody = document.querySelector("#drawer-body");
 
 let activeTab = null;
@@ -540,58 +767,57 @@ function toggleDockTab(tabName) {
     bottomDock.classList.remove("open");
     tabBtnSpotify.classList.remove("active");
     tabBtnSpace.classList.remove("active");
+    tabBtnNews.classList.remove("active");
     panelSpotify.classList.add("hidden");
     panelSpace.classList.add("hidden");
+    panelNews.classList.add("hidden");
     activeTab = null;
   } else {
     bottomDock.classList.add("open");
     activeTab = tabName;
 
-    if (tabName === "spotify") {
-      tabBtnSpotify.classList.add("active");
-      tabBtnSpace.classList.remove("active");
-      panelSpotify.classList.remove("hidden");
-      panelSpace.classList.add("hidden");
-    } else {
-      tabBtnSpace.classList.add("active");
-      tabBtnSpotify.classList.remove("active");
-      panelSpace.classList.remove("hidden");
-      panelSpotify.classList.add("hidden");
-    }
+    tabBtnSpotify.classList.toggle("active", tabName === "spotify");
+    tabBtnSpace.classList.toggle("active", tabName === "space");
+    tabBtnNews.classList.toggle("active", tabName === "news");
+
+    panelSpotify.classList.toggle("hidden", tabName !== "spotify");
+    panelSpace.classList.toggle("hidden", tabName !== "space");
+    panelNews.classList.toggle("hidden", tabName !== "news");
+
+    if (tabName === "news") loadNews(currentNewsCat);
   }
 }
 
 tabBtnSpotify.addEventListener("click", () => toggleDockTab("spotify"));
 tabBtnSpace.addEventListener("click", () => toggleDockTab("space"));
+tabBtnNews.addEventListener("click", () => toggleDockTab("news"));
 
-// --- Spotify Player & Volume Slider Logic ---
+// --- Spotify Player & Presets Engine ---
 const DEFAULT_SPOTIFY_SRC = "https://open.spotify.com/embed/playlist/37i9dQZF1DXdLEN7aqioXM?utm_source=generator&theme=0";
 const spotifyIframe = document.querySelector("#spotify-iframe");
 const spotifyUrlInput = document.querySelector("#spotify-url-input");
 const btnLoadSpotify = document.querySelector("#btn-load-spotify");
-const btnDefaultSpotify = document.querySelector("#btn-default-spotify");
-const volumeSlider = document.querySelector("#spotify-volume-slider");
-const volumeVal = document.querySelector("#volume-val");
+const spotifyFeedback = document.querySelector("#spotify-feedback");
 
+// Restore exact Spotify embed URL across tab refreshes
 const savedSpotifySrc = localStorage.getItem("tab_spotify_embed") || DEFAULT_SPOTIFY_SRC;
 spotifyIframe.src = savedSpotifySrc;
 
-// Restore saved volume slider position
-const savedVolume = localStorage.getItem("tab_spotify_volume") || "80";
-volumeSlider.value = savedVolume;
-volumeVal.textContent = `${savedVolume}%`;
-
-volumeSlider.addEventListener("input", (e) => {
-  const val = e.target.value;
-  volumeVal.textContent = `${val}%`;
-  localStorage.setItem("tab_spotify_volume", val);
-});
-
-function formatSpotifyEmbed(url) {
+function formatSpotifyEmbed(input) {
   try {
-    const parsed = new URL(url);
+    const trimmed = input.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.startsWith("spotify:")) {
+      const parts = trimmed.split(":");
+      if (parts.length >= 3) {
+        return `https://open.spotify.com/embed/${parts[1]}/${parts[2]}?utm_source=generator&theme=0`;
+      }
+    }
+
+    const parsed = new URL(trimmed);
     if (!parsed.hostname.includes("spotify.com")) return null;
-    if (parsed.pathname.includes("/embed/")) return url;
+    if (parsed.pathname.includes("/embed/")) return trimmed;
 
     const segments = parsed.pathname.split("/").filter(Boolean);
     if (segments.length >= 2) {
@@ -603,27 +829,34 @@ function formatSpotifyEmbed(url) {
   }
 }
 
-btnLoadSpotify.addEventListener("click", () => {
-  const rawUrl = spotifyUrlInput.value.trim();
-  const embedUrl = formatSpotifyEmbed(rawUrl);
-
+function loadSpotifyLink(urlOrUri) {
+  const embedUrl = formatSpotifyEmbed(urlOrUri);
   if (embedUrl) {
     spotifyIframe.src = embedUrl;
     localStorage.setItem("tab_spotify_embed", embedUrl);
     spotifyUrlInput.value = "";
+    spotifyFeedback.textContent = "✓ Spotify player updated and saved!";
+    spotifyFeedback.classList.remove("hidden");
+    setTimeout(() => spotifyFeedback.classList.add("hidden"), 3000);
   } else {
-    alert("Please enter a valid Spotify track, album, or playlist link.");
+    alert("Please enter a valid Spotify track, album, or playlist URL.");
   }
+}
+
+btnLoadSpotify.addEventListener("click", () => loadSpotifyLink(spotifyUrlInput.value));
+spotifyUrlInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") loadSpotifyLink(spotifyUrlInput.value);
 });
 
-btnDefaultSpotify.addEventListener("click", () => {
-  spotifyIframe.src = DEFAULT_SPOTIFY_SRC;
-  localStorage.setItem("tab_spotify_embed", DEFAULT_SPOTIFY_SRC);
-  spotifyUrlInput.value = "";
+document.querySelectorAll(".btn-preset").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const uri = btn.dataset.uri;
+    loadSpotifyLink(`https://open.spotify.com/playlist/${uri}`);
+  });
 });
 
 // ==========================================
-// 6. NASA SPACE PHOTO (USER-FRIENDLY APOD)
+// 7. NASA SPACE ARTICLE
 // ==========================================
 function getDateString(daysAgo = 0) {
   const d = new Date();
@@ -631,29 +864,35 @@ function getDateString(daysAgo = 0) {
   return d.toISOString().split("T")[0];
 }
 
-function getRandomDateString() {
-  const start = new Date(1995, 5, 16).getTime();
-  const end = new Date().getTime();
-  const randomTime = start + Math.random() * (end - start);
-  const randomDate = new Date(randomTime);
-  return randomDate.toISOString().split("T")[0];
-}
-
-async function fetchSpacePhoto(date = null) {
-  const endpoint = date
-    ? `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${date}`
-    : `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}`;
-  return await fetch(endpoint);
-}
-
-async function loadSpacePhoto(customDate = null) {
-  drawerBody.innerHTML = `<p class="status-msg">Fetching space snapshot...</p>`;
+async function fetchSpaceArticle(isRandom = false) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 9000);
 
   try {
-    let res = await fetchSpacePhoto(customDate);
+    const endpoint = isRandom
+      ? `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&count=1`
+      : `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}`;
 
-    if (res.status === 500 && !customDate) {
-      res = await fetchSpacePhoto(getDateString(1));
+    const res = await fetch(endpoint, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return res;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      throw new Error("NASA server timed out. Try again in a few seconds.");
+    }
+    throw err;
+  }
+}
+
+async function loadSpaceArticle(isRandom = false) {
+  drawerBody.innerHTML = `<p class="status-msg">Loading NASA space article...</p>`;
+
+  try {
+    let res = await fetchSpaceArticle(isRandom);
+
+    if (res.status === 500 && !isRandom) {
+      res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${getDateString(1)}`);
     }
 
     if (!res.ok) {
@@ -661,24 +900,26 @@ async function loadSpacePhoto(customDate = null) {
       throw new Error(errData.error?.message || errData.msg || `NASA Error (${res.status})`);
     }
 
-    const data = await res.json();
+    const rawData = await res.json();
+    const data = Array.isArray(rawData) ? rawData[0] : rawData;
+
     const isImage = data.media_type === "image";
     const wallpaperUrl = data.hdurl || data.url;
 
     if (isImage) {
       currentSpaceImageUrl = wallpaperUrl;
-      if (isAutoSpace && !customDate) {
+      if (isAutoSpace && !isRandom) {
         applyWallpaper(wallpaperUrl);
       }
     }
 
-    const media = data.media_type === "video"
+    const media = !isImage
       ? `<iframe src="${data.url}" title="${data.title}" allowfullscreen></iframe>`
       : `<img src="${data.url}" alt="${data.title}" loading="eager" />`;
 
-    const wallpaperBtnHtml = isImage
+    const wallpaperActionHtml = isImage
       ? `<button id="btn-set-space-wallpaper" class="btn-space-action" type="button">🖼️ Set as Wallpaper</button>`
-      : "";
+      : `<span class="video-wallpaper-notice" title="NASA video articles cannot be set as wallpaper backgrounds">🎥 Video Article (Cannot set as wallpaper)</span>`;
 
     drawerBody.innerHTML = `
       <header class="drawer-header">
@@ -687,8 +928,8 @@ async function loadSpacePhoto(customDate = null) {
           <span class="photo-date">${data.date}</span>
         </div>
         <div class="drawer-actions">
-          <button id="btn-random-space" class="btn-space-action" type="button">🎲 Surprise Space Photo</button>
-          ${wallpaperBtnHtml}
+          <button id="btn-random-space" class="btn-space-action" type="button">🎲 Surprise Space Article</button>
+          ${wallpaperActionHtml}
         </div>
       </header>
       <div class="media-container">
@@ -699,7 +940,7 @@ async function loadSpacePhoto(customDate = null) {
 
     const randomBtn = document.querySelector("#btn-random-space");
     randomBtn.addEventListener("click", () => {
-      loadSpacePhoto(getRandomDateString());
+      loadSpaceArticle(true);
     });
 
     if (isImage) {
@@ -722,18 +963,181 @@ async function loadSpacePhoto(customDate = null) {
   } catch (err) {
     drawerBody.innerHTML = `
       <div class="drawer-header">
-        <p class="status-msg">Could not load space info: ${err.message}</p>
+        <p class="status-msg">Could not load space article: ${err.message}</p>
         <div class="drawer-actions">
-          <button id="btn-retry-random" class="btn-space-action" type="button">Try Another Date</button>
+          <button id="btn-retry-space" class="btn-space-action" type="button">Try Again</button>
         </div>
       </div>
     `;
 
-    const retryBtn = document.querySelector("#btn-retry-random");
+    const retryBtn = document.querySelector("#btn-retry-space");
     if (retryBtn) {
-      retryBtn.addEventListener("click", () => loadSpacePhoto(getRandomDateString()));
+      retryBtn.addEventListener("click", () => loadSpaceArticle(true));
     }
   }
 }
 
-loadSpacePhoto();
+loadSpaceArticle();
+
+// ==========================================
+// 8. CATEGORIZED LIVE NEWS FEED (WITH IMAGES)
+// ==========================================
+const newsArticlesGrid = document.querySelector("#news-articles-grid");
+let currentNewsCat = "top";
+
+const NEWS_TOPIC_MAP = {
+  top: "https://news.google.com/rss",
+  business: "https://news.google.com/rss/headlines/section/topic/BUSINESS",
+  technology: "https://news.google.com/rss/headlines/section/topic/TECHNOLOGY",
+  entertainment: "https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT",
+  science: "https://news.google.com/rss/headlines/section/topic/SCIENCE",
+  sports: "https://news.google.com/rss/headlines/section/topic/SPORTS"
+};
+
+async function loadNews(category = "top") {
+  newsArticlesGrid.innerHTML = `<p class="status-msg">Fetching live ${category} headlines...</p>`;
+
+  const rssUrl = NEWS_TOPIC_MAP[category] || NEWS_TOPIC_MAP.top;
+  const endpoint = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+  try {
+    const res = await fetch(endpoint);
+    const data = await res.json();
+
+    if (!data.items || data.items.length === 0) {
+      newsArticlesGrid.innerHTML = `<p class="status-msg">No articles found in this category.</p>`;
+      return;
+    }
+
+    newsArticlesGrid.innerHTML = "";
+    data.items.slice(0, 9).forEach((item) => {
+      const card = document.createElement("a");
+      card.className = "news-card";
+      card.href = item.link;
+      card.target = "_blank";
+      card.rel = "noopener noreferrer";
+
+      const pubDate = new Date(item.pubDate).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric"
+      });
+
+      // Try to find image from rss2json output; fallback to placeholder if none exists
+      const imageUrl = item.thumbnail || (item.enclosure && item.enclosure.link) || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80';
+
+      card.innerHTML = `
+        <img src="${imageUrl}" class="news-card-img" alt="News Image" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80'" />
+        <div class="news-card-title">${item.title}</div>
+        <div class="news-card-footer">
+          <span>${item.author || "News"}</span>
+          <span>${pubDate}</span>
+        </div>
+      `;
+
+      newsArticlesGrid.appendChild(card);
+    });
+  } catch (err) {
+    newsArticlesGrid.innerHTML = `<p class="status-msg">Could not load news feed: ${err.message}</p>`;
+  }
+}
+
+document.querySelectorAll(".btn-news-cat").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".btn-news-cat").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentNewsCat = btn.dataset.cat;
+    loadNews(currentNewsCat);
+  });
+});
+
+// ==========================================
+// 9. GLOBAL KEYBOARD SHORTCUTS
+// ==========================================
+const searchInput = document.querySelector("#search-input");
+const keysHelpModal = document.querySelector("#keys-help-modal");
+const btnShortcutsHelp = document.querySelector("#btn-shortcuts-help");
+const btnCloseKeysHelp = document.querySelector("#btn-close-keys-help");
+
+function toggleKeysModal() {
+  keysHelpModal.classList.toggle("hidden");
+}
+
+btnShortcutsHelp.addEventListener("click", toggleKeysModal);
+btnCloseKeysHelp.addEventListener("click", () => keysHelpModal.classList.add("hidden"));
+keysHelpModal.addEventListener("click", (e) => {
+  if (e.target === keysHelpModal) keysHelpModal.classList.add("hidden");
+});
+
+window.addEventListener("keydown", (e) => {
+  const isTyping = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
+
+  // Escape closes all open modals and bottom drawers
+  if (e.key === "Escape") {
+    modalOverlay.classList.add("hidden");
+    keysHelpModal.classList.add("hidden");
+    calendarModal.classList.add("hidden");
+    bottomDock.classList.remove("open");
+    tabBtnSpotify.classList.remove("active");
+    tabBtnSpace.classList.remove("active");
+    tabBtnNews.classList.remove("active");
+    panelSpotify.classList.add("hidden");
+    panelSpace.classList.add("hidden");
+    panelNews.classList.add("hidden");
+    activeTab = null;
+    if (isTyping) document.activeElement.blur();
+    return;
+  }
+
+  if (isTyping) return;
+
+  if (e.key === "/") {
+    e.preventDefault();
+    searchInput.focus();
+    return;
+  }
+
+  if (e.key === "?") {
+    e.preventDefault();
+    toggleKeysModal();
+    return;
+  }
+
+  if (e.key === "n" || e.key === "N") {
+    e.preventDefault();
+    createNewStickyNote();
+    return;
+  }
+
+  if (e.key === "c" || e.key === "C") {
+    e.preventDefault();
+    const currentMode = localStorage.getItem("tab_clock_mode") || "digital";
+    setClockMode(currentMode === "digital" ? "analog" : "digital");
+    return;
+  }
+
+  if (e.key === "m" || e.key === "M") {
+    e.preventDefault();
+    toggleDockTab("spotify");
+    return;
+  }
+
+  if (e.key === "a" || e.key === "A") {
+    e.preventDefault();
+    toggleDockTab("space");
+    return;
+  }
+
+  if (e.key === "w" || e.key === "W") {
+    e.preventDefault();
+    toggleDockTab("news");
+    return;
+  }
+
+  if (["1", "2", "3", "4", "5"].includes(e.key)) {
+    const idx = parseInt(e.key, 10) - 1;
+    const item = shortcuts[idx];
+    if (item && item.url) {
+      window.location.href = item.url;
+    }
+  }
+});

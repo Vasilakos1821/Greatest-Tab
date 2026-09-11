@@ -4,21 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>New Tab</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <!-- Official Google Identity Services Script for Calendar Sync -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <div id="app">
       <!-- Top-Left Clock Style Switcher -->
       <nav class="clock-mode-toggle" aria-label="Clock Display Format">
-        <button id="btn-digital" class="toggle-btn active" type="button">24H</button>
-        <button id="btn-analog" class="toggle-btn" type="button">Analog</button>
+        <button id="btn-digital" class="toggle-btn active" type="button" title="Shortcut: C">24H</button>
+        <button id="btn-analog" class="toggle-btn" type="button" title="Shortcut: C">Analog</button>
       </nav>
 
-      <!-- Top-Right Controls: Sticky Notes & Wallpaper -->
+      <!-- Top-Right Controls: Notes, Shortcuts Help & Wallpaper -->
       <div class="top-controls-right">
-        <button id="btn-add-note" class="control-btn note-btn" type="button" title="Create a new sticky note">
+        <button id="btn-shortcuts-help" class="control-btn" type="button" title="View Keyboard Shortcuts (Press ?)">
+          ⌨️ Keys
+        </button>
+
+        <button id="btn-add-note" class="control-btn note-btn" type="button" title="Create Note (Press N)">
           ➕ Note
         </button>
 
@@ -38,18 +45,21 @@
         </button>
       </div>
 
-      <!-- Container for Dynamic Multiple Draggable Sticky Notes -->
+      <!-- Multiple Draggable Sticky Notes Container -->
       <div id="notes-container"></div>
 
       <!-- Center Content: Clocks, Search, Shortcuts -->
       <main class="center-content">
-        <!-- Digital 24H Display -->
+        <!-- Digital 24H Display & Weather -->
         <div id="digital-clock" class="digital-container">
           <div id="clock" class="clock-digits">00:00:00</div>
-          <div id="current-date" class="date-digits"></div>
+          <div class="date-weather-row">
+            <div id="current-date" class="date-digits clickable-date" title="Click to open Calendar"></div>
+            <div class="weather-digits" title="Current Local Weather">--°</div>
+          </div>
         </div>
 
-        <!-- iPhone-style Circle Analog Display with 1-12 Numbers -->
+        <!-- iPhone-style Circle Analog Display & Weather -->
         <div id="analog-clock" class="analog-container hidden">
           <div class="analog-face">
             <div class="clock-number" style="--i: 12"><span>12</span></div>
@@ -70,18 +80,22 @@
             <div class="hand second-hand" id="second-hand"></div>
             <div class="center-nut"></div>
           </div>
-          <div id="analog-date" class="date-digits"></div>
+          <div class="date-weather-row">
+            <div id="analog-date" class="date-digits clickable-date" title="Click to open Calendar"></div>
+            <div class="weather-digits" title="Current Local Weather">--°</div>
+          </div>
         </div>
 
         <!-- Google Search Bar -->
         <form class="search-form" action="https://www.google.com/search" method="GET" target="_self">
           <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20">
-            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/>
+            <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
           <input 
+            id="search-input"
             type="text" 
             name="q" 
-            placeholder="Search Google..." 
+            placeholder="Search Google... (Press / to focus)" 
             autocomplete="off" 
             spellcheck="false" 
             autofocus 
@@ -92,6 +106,57 @@
         <!-- 5 Draggable Shortcut Slots -->
         <div class="shortcuts-grid" id="shortcuts-grid"></div>
       </main>
+
+      <!-- Calendar & Google Calendar Import Modal -->
+      <div class="modal-overlay hidden" id="calendar-modal">
+        <div class="modal-card calendar-card">
+          <div class="calendar-header-bar">
+            <div class="month-nav">
+              <button id="btn-prev-month" type="button" class="btn-cal-nav">&lt;</button>
+              <h3 id="calendar-month-title">Month Year</h3>
+              <button id="btn-next-month" type="button" class="btn-cal-nav">&gt;</button>
+            </div>
+            <button id="btn-close-calendar" type="button" class="btn-close-modal">✕</button>
+          </div>
+
+          <div class="calendar-grid-weekdays">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div id="calendar-days-grid" class="calendar-days-grid"></div>
+
+          <!-- Schedule & Events Section -->
+          <div class="calendar-details-section">
+            <div class="events-list-header">
+              <h4 id="selected-day-label">Events for Today</h4>
+              <button id="btn-add-event-toggle" type="button" class="btn-mini-action">+ Add Event</button>
+            </div>
+
+            <!-- Add Event Form -->
+            <form id="event-form" class="event-form hidden">
+              <input type="text" id="event-title-input" placeholder="Event title..." required autocomplete="off" />
+              <input type="time" id="event-time-input" />
+              <div class="event-form-actions">
+                <button type="submit" class="btn-primary">Save Event</button>
+                <button type="button" id="btn-cancel-event" class="btn-secondary">Cancel</button>
+              </div>
+            </form>
+
+            <div id="events-container" class="events-container">
+              <p class="no-events-msg">No events scheduled.</p>
+            </div>
+
+            <!-- Direct Google Calendar OAuth Sync -->
+            <div class="gcal-import-box">
+              <p class="gcal-hint">Sync events securely from your Google Account.</p>
+              <button id="btn-sync-gcal" type="button" class="btn-gcal-sync">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" />
+                Sync with Google Calendar
+              </button>
+              <span id="gcal-status" class="gcal-status"></span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Shortcut Modal -->
       <div class="modal-overlay hidden" id="shortcut-modal">
@@ -115,38 +180,81 @@
         </div>
       </div>
 
-      <!-- Bottom Dock: Tabs for Spotify & NASA Space Photo -->
+      <!-- Keyboard Shortcuts Cheat Sheet Modal -->
+      <div class="modal-overlay hidden" id="keys-help-modal">
+        <div class="modal-card keys-help-card">
+          <h3>⌨️ Keyboard Shortcuts</h3>
+          <div class="keys-grid">
+            <div class="key-row"><kbd>/</kbd><span>Focus Google search bar</span></div>
+            <div class="key-row"><kbd>N</kbd><span>Create a new sticky note</span></div>
+            <div class="key-row"><kbd>C</kbd><span>Toggle 24H Digital / Analog clock</span></div>
+            <div class="key-row"><kbd>M</kbd><span>Toggle Spotify tab</span></div>
+            <div class="key-row"><kbd>A</kbd><span>Toggle NASA Space Article tab</span></div>
+            <div class="key-row"><kbd>W</kbd><span>Toggle Live News tab</span></div>
+            <div class="key-row"><kbd>1</kbd> - <kbd>5</kbd><span>Launch shortcut #1 to #5</span></div>
+            <div class="key-row"><kbd>Esc</kbd><span>Close open windows / drawers</span></div>
+            <div class="key-row"><kbd>?</kbd><span>Toggle this cheat sheet</span></div>
+          </div>
+          <button type="button" id="btn-close-keys-help" class="btn-primary" style="margin-top: 1rem; width: 100%;">Got it</button>
+        </div>
+      </div>
+
+      <!-- Bottom Dock: 3 Tabs (Spotify, NASA, Live News) -->
       <section class="bottom-dock" id="bottom-dock">
         <div class="dock-tabs">
-          <button class="dock-tab-btn" id="tab-btn-spotify" type="button">
+          <button class="dock-tab-btn" id="tab-btn-spotify" type="button" title="Shortcut: M">
             <span>🎵 Spotify</span>
             <span class="tab-indicator">▲</span>
           </button>
-          <button class="dock-tab-btn" id="tab-btn-space" type="button">
-            <span>🔭 NASA Space Photo</span>
+          <button class="dock-tab-btn" id="tab-btn-space" type="button" title="Shortcut: A">
+            <span>🔭 NASA Space Article</span>
+            <span class="tab-indicator">▲</span>
+          </button>
+          <button class="dock-tab-btn" id="tab-btn-news" type="button" title="Shortcut: W">
+            <span>📰 Live News</span>
             <span class="tab-indicator">▲</span>
           </button>
         </div>
 
         <div class="dock-drawer-content" id="dock-drawer-content">
-          <!-- Spotify Panel with Volume Slider & Login Link -->
+          <!-- Spotify Panel -->
           <div class="dock-panel hidden" id="panel-spotify">
-            <div class="spotify-controls">
-              <input type="text" id="spotify-url-input" placeholder="Paste Spotify Track / Album / Playlist link..." autocomplete="off" />
-              <button id="btn-load-spotify" type="button" class="btn-dock-action">Load</button>
-              <button id="btn-default-spotify" type="button" class="btn-dock-secondary" title="Reset to default lofi playlist">Reset</button>
-              
-              <!-- Volume Slider Control -->
-              <div class="spotify-volume-control" title="Volume Control">
-                <span class="volume-icon">🔊</span>
-                <input type="range" id="spotify-volume-slider" min="0" max="100" value="80" />
-                <span id="volume-val">80%</span>
-              </div>
+            <!-- Spotify Presets -->
+            <div class="spotify-presets-bar">
+              <span class="presets-label">Spotify Vibes:</span>
+              <button class="btn-preset" data-uri="37i9dQZF1DXdLEN7aqioXM" type="button">☕ Lo-Fi</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXcBWIGoYBM5M" type="button">🔥 Top Hits</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DWZeKCadgRdKQ" type="button">🧠 Deep Focus</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXd9rSDyQguIk" type="button">🌃 Synthwave</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXCF6MNR0TM96" type="button">⚡ Rock</button>
+            </div>
 
-              <a href="https://accounts.spotify.com/login" target="_blank" rel="noopener noreferrer" class="btn-dock-login" title="Log in to Spotify in your browser for full song playback">
-                🔑 Log In
+            <!-- Custom URL, URI & Name Loader -->
+            <div class="spotify-controls">
+              <input 
+                type="text" 
+                id="music-search-input" 
+                placeholder="Type a song/artist, or paste a Spotify link/URI..." 
+                autocomplete="off" 
+              />
+              <button id="btn-search-music" type="button" class="btn-dock-action">Search / Load</button>
+              <button id="btn-default-spotify" type="button" class="btn-dock-secondary" title="Reset to default lofi playlist">Reset</button>
+              <a href="https://accounts.spotify.com/login" target="_blank" rel="noopener noreferrer" class="btn-dock-login" title="Log in to Spotify for uninterrupted full songs">
+                🔑 Spotify Login
               </a>
             </div>
+
+            <!-- In-Tab Search Results Box -->
+            <div id="search-results-box" class="search-results-box hidden">
+              <div class="search-results-header">
+                <span>Select a song to play in Spotify player:</span>
+                <button id="btn-close-results" type="button">✕</button>
+              </div>
+              <div id="search-results-list" class="search-results-list"></div>
+            </div>
+
+            <div id="spotify-feedback" class="spotify-feedback hidden"></div>
+
             <div class="spotify-frame-container">
               <iframe 
                 id="spotify-iframe" 
@@ -161,10 +269,25 @@
             </div>
           </div>
 
-          <!-- NASA Daily Space Photo Panel -->
+          <!-- NASA Daily Space Article Panel -->
           <div class="dock-panel hidden" id="panel-space">
             <div class="drawer-body" id="drawer-body">
-              <p class="status-msg">Loading space snapshot...</p>
+              <p class="status-msg">Loading NASA space article...</p>
+            </div>
+          </div>
+
+          <!-- Live Categorized News Panel -->
+          <div class="dock-panel hidden" id="panel-news">
+            <div class="news-categories-bar">
+              <button class="btn-news-cat active" data-cat="top">🌐 General</button>
+              <button class="btn-news-cat" data-cat="business">💼 Finance</button>
+              <button class="btn-news-cat" data-cat="technology">💻 Tech</button>
+              <button class="btn-news-cat" data-cat="entertainment">🎬 Entertainment</button>
+              <button class="btn-news-cat" data-cat="science">🚀 Science</button>
+              <button class="btn-news-cat" data-cat="sports">⚽ Sports</button>
+            </div>
+            <div id="news-articles-grid" class="news-articles-grid">
+              <p class="status-msg">Loading latest headlines...</p>
             </div>
           </div>
         </div>
