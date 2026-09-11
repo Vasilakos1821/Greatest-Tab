@@ -8,9 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
-    <!-- Official Google Identity Services Script for Calendar Sync -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <meta name="google-site-verification" content="iOoN9qLKJQUP4siu1ROP3FBmOhr_8ePRq7YwgJeBE3M" />
   </head>
   <body>
     <div id="app">
@@ -108,7 +105,7 @@
         <div class="shortcuts-grid" id="shortcuts-grid"></div>
       </main>
 
-      <!-- Calendar & Google Calendar Import Modal -->
+      <!-- Calendar Modal (Local Events Only) -->
       <div class="modal-overlay hidden" id="calendar-modal">
         <div class="modal-card calendar-card">
           <div class="calendar-header-bar">
@@ -144,16 +141,6 @@
 
             <div id="events-container" class="events-container">
               <p class="no-events-msg">No events scheduled.</p>
-            </div>
-
-            <!-- Direct Google Calendar OAuth Sync -->
-            <div class="gcal-import-box">
-              <p class="gcal-hint">Sync events securely from your Google Account.</p>
-              <button id="btn-sync-gcal" type="button" class="btn-gcal-sync">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" />
-                Sync with Google Calendar
-              </button>
-              <span id="gcal-status" class="gcal-status"></span>
             </div>
           </div>
         </div>
@@ -225,7 +212,7 @@
               <span class="presets-label">Spotify Vibes:</span>
               <button class="btn-preset" data-uri="37i9dQZF1DXdLEN7aqioXM" type="button">☕ Lo-Fi</button>
               <button class="btn-preset" data-uri="37i9dQZF1DXcBWIGoYBM5M" type="button">🔥 Top Hits</button>
-              <button class="btn-preset" data-uri="37i9dQZF1DWZeKCadgRdKQ" type="button">🧠 Deep Focus</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXd9rSDyQguIk" type="button">🧠 Deep Focus</button>
               <button class="btn-preset" data-uri="37i9dQZF1DXd9rSDyQguIk" type="button">🌃 Synthwave</button>
               <button class="btn-preset" data-uri="37i9dQZF1DXCF6MNR0TM96" type="button">⚡ Rock</button>
             </div>
@@ -243,15 +230,6 @@
               <a href="https://accounts.spotify.com/login" target="_blank" rel="noopener noreferrer" class="btn-dock-login" title="Log in to Spotify for uninterrupted full songs">
                 🔑 Spotify Login
               </a>
-            </div>
-
-            <!-- In-Tab Search Results Box -->
-            <div id="search-results-box" class="search-results-box hidden">
-              <div class="search-results-header">
-                <span>Select a song to play in Spotify player:</span>
-                <button id="btn-close-results" type="button">✕</button>
-              </div>
-              <div id="search-results-list" class="search-results-list"></div>
             </div>
 
             <div id="spotify-feedback" class="spotify-feedback hidden"></div>

@@ -1,7 +1,6 @@
 import './style.css'; 
 
 const API_KEY = import.meta.env.VITE_NASA_API_KEY;
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 // ==========================================
 // 1. CLOCK LOGIC
@@ -351,7 +350,7 @@ addNoteBtn.addEventListener("click", createNewStickyNote);
 renderAllNotes();
 
 // ==========================================
-// 5. CALENDAR & GOOGLE OAUTH SYNC
+// 5. LOCAL CALENDAR SYSTEM
 // ==========================================
 const calendarModal = document.querySelector("#calendar-modal");
 const btnCloseCalendar = document.querySelector("#btn-close-calendar");
@@ -368,72 +367,9 @@ const eventTimeInput = document.querySelector("#event-time-input");
 const btnCancelEvent = document.querySelector("#btn-cancel-event");
 const eventsContainer = document.querySelector("#events-container");
 
-const btnSyncGcal = document.querySelector("#btn-sync-gcal");
-const gcalStatus = document.querySelector("#gcal-status");
-
 let calendarDate = new Date();
 let selectedDateStr = new Date().toISOString().split("T")[0];
 let calendarEvents = JSON.parse(localStorage.getItem("tab_calendar_events")) || {};
-
-// Initialize Google OAuth 2.0 client
-let tokenClient;
-window.addEventListener('load', () => {
-  if (typeof google !== 'undefined') {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/calendar.readonly',
-      callback: async (response) => {
-        if (response.error !== undefined) throw (response);
-        await fetchGoogleEvents(response.access_token);
-      },
-    });
-  }
-});
-
-btnSyncGcal.addEventListener("click", () => {
-  if (GOOGLE_CLIENT_ID === "PASTE_YOUR_GOOGLE_CLIENT_ID_HERE") {
-    alert("Developer Setup Required: Please add your Google Client ID to main.js");
-    return;
-  }
-  if (tokenClient) {
-    tokenClient.requestAccessToken({ prompt: 'consent' });
-  }
-});
-
-async function fetchGoogleEvents(token) {
-  gcalStatus.textContent = "Syncing calendar...";
-  const now = new Date();
-  // Fetch up to 50 upcoming events
-  const timeMin = now.toISOString();
-  
-  try {
-    const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&maxResults=50&singleEvents=true&orderBy=startTime`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const data = await res.json();
-    
-    let count = 0;
-    data.items.forEach(event => {
-      const dateStr = event.start.dateTime ? event.start.dateTime.split("T")[0] : event.start.date;
-      const timeStr = event.start.dateTime ? event.start.dateTime.substring(11, 16) : "All Day";
-      
-      if (!calendarEvents[dateStr]) calendarEvents[dateStr] = [];
-      
-      if (!calendarEvents[dateStr].find(e => e.title === event.summary)) {
-        calendarEvents[dateStr].push({ title: event.summary || "Busy", time: timeStr });
-        count++;
-      }
-    });
-    
-    saveCalendarEvents();
-    renderCalendar();
-    renderSelectedDayEvents();
-    gcalStatus.textContent = `✓ Synced ${count} upcoming events!`;
-    setTimeout(() => gcalStatus.textContent = "", 4000);
-  } catch(err) {
-    gcalStatus.textContent = "Error fetching events.";
-  }
-}
 
 function saveCalendarEvents() {
   localStorage.setItem("tab_calendar_events", JSON.stringify(calendarEvents));
@@ -578,7 +514,7 @@ eventForm.addEventListener("submit", (e) => {
 });
 
 // ==========================================
-// 6. SHORTCUTS (1: GITHUB, 2: REDDIT, 3: YOUTUBE)
+// 6. SHORTCUTS
 // ==========================================
 const DEFAULT_SHORTCUTS = [
   { name: "GitHub", url: "https://github.com" },
@@ -828,19 +764,15 @@ tabBtnSpotify.addEventListener("click", () => toggleDockTab("spotify"));
 tabBtnSpace.addEventListener("click", () => toggleDockTab("space"));
 tabBtnNews.addEventListener("click", () => toggleDockTab("news"));
 
-// --- In-Tab Spotify Search Engine (iTunes Music API) ---
+// --- Spotify Controls ---
 const musicSearchInput = document.querySelector("#music-search-input");
 const btnSearchMusic = document.querySelector("#btn-search-music");
-const searchResultsBox = document.querySelector("#search-results-box");
-const searchResultsList = document.querySelector("#search-results-list");
-const btnCloseResults = document.querySelector("#btn-close-results");
 
 const DEFAULT_SPOTIFY_SRC = "https://open.spotify.com/embed/playlist/37i9dQZF1DXdLEN7aqioXM?utm_source=generator&theme=0";
 const spotifyIframe = document.querySelector("#spotify-iframe");
 const btnDefaultSpotify = document.querySelector("#btn-default-spotify");
 const spotifyFeedback = document.querySelector("#spotify-feedback");
 
-// Restore exact Spotify embed URL across tab refreshes
 const savedSpotifySrc = localStorage.getItem("tab_spotify_embed") || DEFAULT_SPOTIFY_SRC;
 spotifyIframe.src = savedSpotifySrc;
 
@@ -874,13 +806,11 @@ async function executeMusicSearch() {
   const query = musicSearchInput.value.trim();
   if (!query) return;
 
-  // If user pasted an actual Spotify link, update Spotify player directly
   const spotifyEmbed = formatSpotifyEmbed(query);
   if (spotifyEmbed) {
     spotifyIframe.src = spotifyEmbed;
     localStorage.setItem("tab_spotify_embed", spotifyEmbed);
     musicSearchInput.value = "";
-    searchResultsBox.classList.add("hidden");
     
     spotifyFeedback.textContent = "✓ Spotify player updated and saved!";
     spotifyFeedback.classList.remove("hidden");
@@ -888,7 +818,6 @@ async function executeMusicSearch() {
     return;
   }
 
-  // Otherwise search by song/artist name and open Spotify Search
   const searchUrl = `https://open.spotify.com/search/${encodeURIComponent(query)}`;
   window.open(searchUrl, "_blank", "noopener,noreferrer");
 
@@ -906,7 +835,6 @@ btnDefaultSpotify.addEventListener("click", () => {
   spotifyIframe.src = DEFAULT_SPOTIFY_SRC;
   localStorage.setItem("tab_spotify_embed", DEFAULT_SPOTIFY_SRC);
   musicSearchInput.value = "";
-  searchResultsBox.classList.add("hidden");
 });
 
 document.querySelectorAll(".btn-preset").forEach(btn => {
@@ -1043,7 +971,7 @@ function getDateString(daysAgo = 0) {
 loadSpaceArticle();
 
 // ==========================================
-// 9. LIVE NEWS FEED (WITH ORIGINAL IMAGES)
+// 9. LIVE NEWS FEED
 // ==========================================
 const newsArticlesGrid = document.querySelector("#news-articles-grid");
 let currentNewsCat = "general";
@@ -1074,7 +1002,6 @@ async function loadNews(category = "top") {
 
     newsArticlesGrid.innerHTML = "";
     
-    // Filter out articles flagged as removed by publishers
     const validArticles = data.articles.filter(item => item.title && !item.title.includes("[Removed]"));
 
     validArticles.slice(0, 9).forEach((item) => {
@@ -1089,7 +1016,6 @@ async function loadNews(category = "top") {
         day: "numeric"
       });
 
-      // Saurav API maps the real article thumbnail directly to `urlToImage`
       const imageUrl = item.urlToImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80';
 
       card.innerHTML = `

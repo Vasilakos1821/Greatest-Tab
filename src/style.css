@@ -906,57 +906,6 @@ body.default-bg {
   margin: 0.5rem 0;
 }
 
-/* One-Click Google Calendar Sync */
-.gcal-import-box {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.gcal-hint {
-  font-size: 0.74rem;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.btn-gcal-sync {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  background: #ffffff;
-  color: #333333;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.btn-gcal-sync:hover {
-  background: #f1f5f9;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
-}
-
-.btn-gcal-sync img {
-  width: 18px;
-  height: 18px;
-}
-
-.gcal-status {
-  font-size: 0.75rem;
-  color: #38bdf8;
-  text-align: center;
-  font-weight: 600;
-}
-
 /* --- Unified Bottom Dock (3 Tabs) --- */
 .bottom-dock {
   position: fixed;
@@ -1161,98 +1110,6 @@ body.default-bg {
   border-radius: 6px;
 }
 
-.search-results-box {
-  background: #111827;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-}
-
-.search-results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0.8rem;
-  background: rgba(56, 189, 248, 0.1);
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
-  color: #38bdf8;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.search-results-header button {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-}
-
-.search-results-list {
-  max-height: 220px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.search-result-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.8rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.search-result-item:hover {
-  background: rgba(56, 189, 248, 0.12);
-}
-
-.search-result-item img {
-  width: 42px;
-  height: 42px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-
-.track-meta {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.track-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.track-artist {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.btn-item-play {
-  background: #38bdf8;
-  border: none;
-  color: #08090e;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 6px 12px;
-  border-radius: 6px;
-  pointer-events: none;
-}
-
 .spotify-frame-container {
   border-radius: 12px;
   overflow: hidden;
@@ -1333,7 +1190,7 @@ body.default-bg {
   line-height: 1.4;
   color: #ffffff;
   margin-bottom: 0.5rem;
-  flex: 1; /* Pushes footer to bottom */
+  flex: 1;
 }
 
 .news-card-footer {
