@@ -1,31 +1,93 @@
-body {
-    margin: 0;
-    padding: 2rem 0;
-    min-height: 100vh;
-    position: relative;
+* {
+  box-sizing: border-box;
 }
 
-body::before, 
-body::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #986aa5;
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #0b0d17;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem;
 }
+
+#app {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
 h1 {
   font-family: 'Orbitron', sans-serif;
+  margin: 0 0 0.5rem 0;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  letter-spacing: 1px;
 }
 
-p {
+.date {
+  font-family: 'Orbitron', sans-serif;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.media-frame {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: #161a2b;
+}
+
+.media-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.media-frame iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  display: block;
+}
+
+p.explanation {
   font-family: 'Black Ops One', sans-serif;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  text-align: justify;
 }
 
-@media (max-width: 600px) {
-  body::before,
-  body::after {
-    display: none;
-  }
+.loading {
+  font-family: 'Orbitron', sans-serif;
+  margin-top: 4rem;
+  font-size: 1.1rem;
+}
+
+.error-box {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 500px;
+}
+
+.error-box h2 {
+  font-family: 'Orbitron', sans-serif;
+  margin-top: 0;
+  color: #fca5a5;
+}
+
+.error-box small {
+  display: block;
+  margin-top: 1rem;
+  color: #f87171;
 }
