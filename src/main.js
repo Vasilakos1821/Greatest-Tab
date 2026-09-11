@@ -1,6 +1,7 @@
 import './style.css'; 
 
 const API_KEY = import.meta.env.VITE_NASA_API_KEY;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 // ==========================================
 // 1. CLOCK LOGIC
@@ -72,7 +73,43 @@ setInterval(updateClocks, 1000);
 updateClocks();
 
 // ==========================================
-// 2. WALLPAPER SYSTEM
+// 2. LIVE LOCAL WEATHER (OPEN-METEO)
+// ==========================================
+const weatherDisplays = document.querySelectorAll(".weather-digits");
+
+function loadWeather() {
+  if (!navigator.geolocation) return;
+  
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      const { latitude, longitude } = pos.coords;
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+      const data = await res.json();
+      
+      const temp = Math.round(data.current_weather.temperature);
+      const code = data.current_weather.weathercode;
+      
+      let icon = "🌤️";
+      if (code === 0) icon = "☀️";
+      else if (code <= 3) icon = "⛅";
+      else if (code <= 48) icon = "🌫️";
+      else if (code <= 67) icon = "🌧️";
+      else if (code <= 77) icon = "❄️";
+      else if (code <= 82) icon = "🌦️";
+      else if (code <= 99) icon = "⛈️";
+
+      weatherDisplays.forEach(el => el.textContent = `${temp}°C ${icon}`);
+    } catch (e) {
+      // Silently fail if fetch errors
+    }
+  }, () => {
+    weatherDisplays.forEach(el => el.textContent = `📍 Location disabled`);
+  });
+}
+loadWeather();
+
+// ==========================================
+// 3. WALLPAPER SYSTEM
 // ==========================================
 const wallpaperInput = document.querySelector("#wallpaper-input");
 const uploadBtn = document.querySelector("#btn-upload-wallpaper");
@@ -178,7 +215,7 @@ if (!isAutoSpace) {
 }
 
 // ==========================================
-// 3. MULTIPLE DRAGGABLE STICKY NOTES
+// 4. MULTIPLE DRAGGABLE STICKY NOTES
 // ==========================================
 const notesContainer = document.querySelector("#notes-container");
 const addNoteBtn = document.querySelector("#btn-add-note");
@@ -314,7 +351,7 @@ addNoteBtn.addEventListener("click", createNewStickyNote);
 renderAllNotes();
 
 // ==========================================
-// 4. FRIENDLY CALENDAR & GOOGLE IMPORT
+// 5. CALENDAR & GOOGLE OAUTH SYNC
 // ==========================================
 const calendarModal = document.querySelector("#calendar-modal");
 const btnCloseCalendar = document.querySelector("#btn-close-calendar");
@@ -331,14 +368,72 @@ const eventTimeInput = document.querySelector("#event-time-input");
 const btnCancelEvent = document.querySelector("#btn-cancel-event");
 const eventsContainer = document.querySelector("#events-container");
 
-const gcalToggle = document.querySelector("#gcal-toggle");
-const gcalPanel = document.querySelector("#gcal-panel");
-const gcalFileInput = document.querySelector("#gcal-file-input");
+const btnSyncGcal = document.querySelector("#btn-sync-gcal");
 const gcalStatus = document.querySelector("#gcal-status");
 
 let calendarDate = new Date();
 let selectedDateStr = new Date().toISOString().split("T")[0];
 let calendarEvents = JSON.parse(localStorage.getItem("tab_calendar_events")) || {};
+
+// Initialize Google OAuth 2.0 client
+let tokenClient;
+window.addEventListener('load', () => {
+  if (typeof google !== 'undefined') {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/calendar.readonly',
+      callback: async (response) => {
+        if (response.error !== undefined) throw (response);
+        await fetchGoogleEvents(response.access_token);
+      },
+    });
+  }
+});
+
+btnSyncGcal.addEventListener("click", () => {
+  if (GOOGLE_CLIENT_ID === "PASTE_YOUR_GOOGLE_CLIENT_ID_HERE") {
+    alert("Developer Setup Required: Please add your Google Client ID to main.js");
+    return;
+  }
+  if (tokenClient) {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+});
+
+async function fetchGoogleEvents(token) {
+  gcalStatus.textContent = "Syncing calendar...";
+  const now = new Date();
+  // Fetch up to 50 upcoming events
+  const timeMin = now.toISOString();
+  
+  try {
+    const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&maxResults=50&singleEvents=true&orderBy=startTime`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    
+    let count = 0;
+    data.items.forEach(event => {
+      const dateStr = event.start.dateTime ? event.start.dateTime.split("T")[0] : event.start.date;
+      const timeStr = event.start.dateTime ? event.start.dateTime.substring(11, 16) : "All Day";
+      
+      if (!calendarEvents[dateStr]) calendarEvents[dateStr] = [];
+      
+      if (!calendarEvents[dateStr].find(e => e.title === event.summary)) {
+        calendarEvents[dateStr].push({ title: event.summary || "Busy", time: timeStr });
+        count++;
+      }
+    });
+    
+    saveCalendarEvents();
+    renderCalendar();
+    renderSelectedDayEvents();
+    gcalStatus.textContent = `✓ Synced ${count} upcoming events!`;
+    setTimeout(() => gcalStatus.textContent = "", 4000);
+  } catch(err) {
+    gcalStatus.textContent = "Error fetching events.";
+  }
+}
 
 function saveCalendarEvents() {
   localStorage.setItem("tab_calendar_events", JSON.stringify(calendarEvents));
@@ -353,10 +448,6 @@ function openCalendar() {
 digitalDate.addEventListener("click", openCalendar);
 analogDate.addEventListener("click", openCalendar);
 btnCloseCalendar.addEventListener("click", () => calendarModal.classList.add("hidden"));
-
-gcalToggle.addEventListener("click", () => {
-  gcalPanel.classList.toggle("hidden");
-});
 
 btnPrevMonth.addEventListener("click", () => {
   calendarDate.setMonth(calendarDate.getMonth() - 1);
@@ -486,63 +577,8 @@ eventForm.addEventListener("submit", (e) => {
   renderSelectedDayEvents();
 });
 
-function parseICSData(icsText) {
-  const lines = icsText.split(/\r\n|\n|\r/);
-  let inEvent = false;
-  let currentEvent = {};
-  let count = 0;
-
-  for (let line of lines) {
-    if (line.startsWith("BEGIN:VEVENT")) {
-      inEvent = true;
-      currentEvent = {};
-    } else if (line.startsWith("END:VEVENT")) {
-      inEvent = false;
-      if (currentEvent.title && currentEvent.date) {
-        if (!calendarEvents[currentEvent.date]) {
-          calendarEvents[currentEvent.date] = [];
-        }
-        calendarEvents[currentEvent.date].push({
-          title: currentEvent.title,
-          time: currentEvent.time || "All Day"
-        });
-        count++;
-      }
-    } else if (inEvent) {
-      if (line.startsWith("SUMMARY:")) {
-        currentEvent.title = line.replace("SUMMARY:", "").trim();
-      } else if (line.startsWith("DTSTART")) {
-        const val = line.split(":")[1];
-        if (val && val.length >= 8) {
-          const y = val.substring(0, 4);
-          const m = val.substring(4, 6);
-          const d = val.substring(6, 8);
-          currentEvent.date = `${y}-${m}-${d}`;
-          if (val.includes("T") && val.length >= 13) {
-            currentEvent.time = `${val.substring(9, 11)}:${val.substring(11, 13)}`;
-          }
-        }
-      }
-    }
-  }
-
-  saveCalendarEvents();
-  renderCalendar();
-  renderSelectedDayEvents();
-  gcalStatus.textContent = `✓ Successfully imported ${count} events!`;
-}
-
-// Upload step for the friendly 2-step process
-gcalFileInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (evt) => parseICSData(evt.target.result);
-  reader.readAsText(file);
-});
-
 // ==========================================
-// 5. SHORTCUTS (1: GITHUB, 2: REDDIT, 3: YOUTUBE)
+// 6. SHORTCUTS (1: GITHUB, 2: REDDIT, 3: YOUTUBE)
 // ==========================================
 const DEFAULT_SHORTCUTS = [
   { name: "GitHub", url: "https://github.com" },
@@ -748,7 +784,7 @@ modalOverlay.addEventListener("click", (e) => {
 renderShortcuts();
 
 // ==========================================
-// 6. BOTTOM DOCK (SPOTIFY, NASA, NEWS)
+// 7. BOTTOM DOCK (SPOTIFY, NASA, NEWS)
 // ==========================================
 const bottomDock = document.querySelector("#bottom-dock");
 const tabBtnSpotify = document.querySelector("#tab-btn-spotify");
@@ -792,20 +828,25 @@ tabBtnSpotify.addEventListener("click", () => toggleDockTab("spotify"));
 tabBtnSpace.addEventListener("click", () => toggleDockTab("space"));
 tabBtnNews.addEventListener("click", () => toggleDockTab("news"));
 
-// --- Spotify Player & Presets Engine ---
+// --- In-Tab Spotify Search Engine (iTunes Music API) ---
+const musicSearchInput = document.querySelector("#music-search-input");
+const btnSearchMusic = document.querySelector("#btn-search-music");
+const searchResultsBox = document.querySelector("#search-results-box");
+const searchResultsList = document.querySelector("#search-results-list");
+const btnCloseResults = document.querySelector("#btn-close-results");
+
 const DEFAULT_SPOTIFY_SRC = "https://open.spotify.com/embed/playlist/37i9dQZF1DXdLEN7aqioXM?utm_source=generator&theme=0";
 const spotifyIframe = document.querySelector("#spotify-iframe");
-const spotifyUrlInput = document.querySelector("#spotify-url-input");
-const btnLoadSpotify = document.querySelector("#btn-load-spotify");
+const btnDefaultSpotify = document.querySelector("#btn-default-spotify");
 const spotifyFeedback = document.querySelector("#spotify-feedback");
 
 // Restore exact Spotify embed URL across tab refreshes
 const savedSpotifySrc = localStorage.getItem("tab_spotify_embed") || DEFAULT_SPOTIFY_SRC;
 spotifyIframe.src = savedSpotifySrc;
 
-function formatSpotifyEmbed(input) {
+function formatSpotifyEmbed(url) {
   try {
-    const trimmed = input.trim();
+    const trimmed = url.trim();
     if (!trimmed) return null;
 
     if (trimmed.startsWith("spotify:")) {
@@ -829,41 +870,57 @@ function formatSpotifyEmbed(input) {
   }
 }
 
-function loadSpotifyLink(urlOrUri) {
-  const embedUrl = formatSpotifyEmbed(urlOrUri);
-  if (embedUrl) {
-    spotifyIframe.src = embedUrl;
-    localStorage.setItem("tab_spotify_embed", embedUrl);
-    spotifyUrlInput.value = "";
+async function executeMusicSearch() {
+  const query = musicSearchInput.value.trim();
+  if (!query) return;
+
+  // If user pasted an actual Spotify link, update Spotify player directly
+  const spotifyEmbed = formatSpotifyEmbed(query);
+  if (spotifyEmbed) {
+    spotifyIframe.src = spotifyEmbed;
+    localStorage.setItem("tab_spotify_embed", spotifyEmbed);
+    musicSearchInput.value = "";
+    searchResultsBox.classList.add("hidden");
+    
     spotifyFeedback.textContent = "✓ Spotify player updated and saved!";
     spotifyFeedback.classList.remove("hidden");
     setTimeout(() => spotifyFeedback.classList.add("hidden"), 3000);
-  } else {
-    alert("Please enter a valid Spotify track, album, or playlist URL.");
+    return;
   }
+
+  // Otherwise search by song/artist name and open Spotify Search
+  const searchUrl = `https://open.spotify.com/search/${encodeURIComponent(query)}`;
+  window.open(searchUrl, "_blank", "noopener,noreferrer");
+
+  spotifyFeedback.innerHTML = `🔍 Opened search for <strong>"${query}"</strong> on Spotify. (Tip: Copy its link to pin it here)`;
+  spotifyFeedback.classList.remove("hidden");
+  setTimeout(() => spotifyFeedback.classList.add("hidden"), 6000);
 }
 
-btnLoadSpotify.addEventListener("click", () => loadSpotifyLink(spotifyUrlInput.value));
-spotifyUrlInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") loadSpotifyLink(spotifyUrlInput.value);
+btnSearchMusic.addEventListener("click", executeMusicSearch);
+musicSearchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") executeMusicSearch();
+});
+
+btnDefaultSpotify.addEventListener("click", () => {
+  spotifyIframe.src = DEFAULT_SPOTIFY_SRC;
+  localStorage.setItem("tab_spotify_embed", DEFAULT_SPOTIFY_SRC);
+  musicSearchInput.value = "";
+  searchResultsBox.classList.add("hidden");
 });
 
 document.querySelectorAll(".btn-preset").forEach(btn => {
   btn.addEventListener("click", () => {
     const uri = btn.dataset.uri;
-    loadSpotifyLink(`https://open.spotify.com/playlist/${uri}`);
+    const embedUrl = formatSpotifyEmbed(`https://open.spotify.com/playlist/${uri}`);
+    spotifyIframe.src = embedUrl;
+    localStorage.setItem("tab_spotify_embed", embedUrl);
   });
 });
 
 // ==========================================
-// 7. NASA SPACE ARTICLE
+// 8. NASA SPACE ARTICLE
 // ==========================================
-function getDateString(daysAgo = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  return d.toISOString().split("T")[0];
-}
-
 async function fetchSpaceArticle(isRandom = false) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 9000);
@@ -977,59 +1034,69 @@ async function loadSpaceArticle(isRandom = false) {
   }
 }
 
+function getDateString(daysAgo = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().split("T")[0];
+}
+
 loadSpaceArticle();
 
 // ==========================================
-// 8. CATEGORIZED LIVE NEWS FEED (WITH IMAGES)
+// 9. LIVE NEWS FEED (WITH ORIGINAL IMAGES)
 // ==========================================
 const newsArticlesGrid = document.querySelector("#news-articles-grid");
-let currentNewsCat = "top";
+let currentNewsCat = "general";
 
 const NEWS_TOPIC_MAP = {
-  top: "https://news.google.com/rss",
-  business: "https://news.google.com/rss/headlines/section/topic/BUSINESS",
-  technology: "https://news.google.com/rss/headlines/section/topic/TECHNOLOGY",
-  entertainment: "https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT",
-  science: "https://news.google.com/rss/headlines/section/topic/SCIENCE",
-  sports: "https://news.google.com/rss/headlines/section/topic/SPORTS"
+  top: "general",
+  business: "business",
+  technology: "technology",
+  entertainment: "entertainment",
+  science: "science",
+  sports: "sports"
 };
 
 async function loadNews(category = "top") {
-  newsArticlesGrid.innerHTML = `<p class="status-msg">Fetching live ${category} headlines...</p>`;
+  newsArticlesGrid.innerHTML = `<p class="status-msg">Fetching live headlines...</p>`;
 
-  const rssUrl = NEWS_TOPIC_MAP[category] || NEWS_TOPIC_MAP.top;
-  const endpoint = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+  const catStr = NEWS_TOPIC_MAP[category] || "general";
+  const endpoint = `https://saurav.tech/NewsAPI/top-headlines/category/${catStr}/us.json`;
 
   try {
     const res = await fetch(endpoint);
     const data = await res.json();
 
-    if (!data.items || data.items.length === 0) {
+    if (!data.articles || data.articles.length === 0) {
       newsArticlesGrid.innerHTML = `<p class="status-msg">No articles found in this category.</p>`;
       return;
     }
 
     newsArticlesGrid.innerHTML = "";
-    data.items.slice(0, 9).forEach((item) => {
+    
+    // Filter out articles flagged as removed by publishers
+    const validArticles = data.articles.filter(item => item.title && !item.title.includes("[Removed]"));
+
+    validArticles.slice(0, 9).forEach((item) => {
       const card = document.createElement("a");
       card.className = "news-card";
-      card.href = item.link;
+      card.href = item.url;
       card.target = "_blank";
       card.rel = "noopener noreferrer";
 
-      const pubDate = new Date(item.pubDate).toLocaleDateString(undefined, {
+      const pubDate = new Date(item.publishedAt).toLocaleDateString(undefined, {
         month: "short",
         day: "numeric"
       });
 
-      // Try to find image from rss2json output; fallback to placeholder if none exists
-      const imageUrl = item.thumbnail || (item.enclosure && item.enclosure.link) || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80';
+      // Saurav API maps the real article thumbnail directly to `urlToImage`
+      const imageUrl = item.urlToImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80';
 
       card.innerHTML = `
         <img src="${imageUrl}" class="news-card-img" alt="News Image" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80'" />
         <div class="news-card-title">${item.title}</div>
         <div class="news-card-footer">
-          <span>${item.author || "News"}</span>
+          <span>${item.source?.name || "News"}</span>
           <span>${pubDate}</span>
         </div>
       `;
@@ -1051,7 +1118,7 @@ document.querySelectorAll(".btn-news-cat").forEach(btn => {
 });
 
 // ==========================================
-// 9. GLOBAL KEYBOARD SHORTCUTS
+// 10. GLOBAL KEYBOARD SHORTCUTS
 // ==========================================
 const searchInput = document.querySelector("#search-input");
 const keysHelpModal = document.querySelector("#keys-help-modal");
@@ -1071,7 +1138,6 @@ keysHelpModal.addEventListener("click", (e) => {
 window.addEventListener("keydown", (e) => {
   const isTyping = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
 
-  // Escape closes all open modals and bottom drawers
   if (e.key === "Escape") {
     modalOverlay.classList.add("hidden");
     keysHelpModal.classList.add("hidden");
