@@ -20,7 +20,7 @@
       <!-- Top-Right Controls: Notes, Shortcuts Help & Wallpaper -->
       <div class="top-controls-right">
         <button id="btn-shortcuts-help" class="control-btn" type="button" title="View Keyboard Shortcuts (Press ?)">
-          ⌨️ Keys
+          ⌨️ Keyboard Shortcuts
         </button>
 
         <button id="btn-add-note" class="control-btn note-btn" type="button" title="Create Note (Press N)">
@@ -48,16 +48,15 @@
 
       <!-- Center Content: Clocks, Search, Shortcuts -->
       <main class="center-content">
-        <!-- Digital 24H Display & Weather -->
+        <!-- Digital 24H Display -->
         <div id="digital-clock" class="digital-container">
           <div id="clock" class="clock-digits">00:00:00</div>
-          <div class="date-weather-row">
+          <div class="date-row">
             <div id="current-date" class="date-digits clickable-date" title="Click to open Calendar"></div>
-            <div class="weather-digits" title="Current Local Weather">--°</div>
           </div>
         </div>
 
-        <!-- iPhone-style Circle Analog Display & Weather -->
+        <!-- iPhone-style Circle Analog Display -->
         <div id="analog-clock" class="analog-container hidden">
           <div class="analog-face">
             <div class="clock-number" style="--i: 12"><span>12</span></div>
@@ -78,9 +77,8 @@
             <div class="hand second-hand" id="second-hand"></div>
             <div class="center-nut"></div>
           </div>
-          <div class="date-weather-row">
+          <div class="date-row">
             <div id="analog-date" class="date-digits clickable-date" title="Click to open Calendar"></div>
-            <div class="weather-digits" title="Current Local Weather">--°</div>
           </div>
         </div>
 
@@ -105,7 +103,7 @@
         <div class="shortcuts-grid" id="shortcuts-grid"></div>
       </main>
 
-      <!-- Calendar Modal (Local Events Only) -->
+      <!-- Calendar Modal with .ics Import -->
       <div class="modal-overlay hidden" id="calendar-modal">
         <div class="modal-card calendar-card">
           <div class="calendar-header-bar">
@@ -141,6 +139,15 @@
 
             <div id="events-container" class="events-container">
               <p class="no-events-msg">No events scheduled.</p>
+            </div>
+
+            <!-- Local .ics Import Action -->
+            <div class="ics-import-box">
+              <input type="file" id="ics-file-input" accept=".ics,text/calendar" hidden />
+              <button id="btn-import-ics" type="button" class="btn-import-ics">
+                📥 Import .ics Calendar File
+              </button>
+              <span id="ics-status" class="ics-status"></span>
             </div>
           </div>
         </div>
@@ -179,6 +186,7 @@
             <div class="key-row"><kbd>M</kbd><span>Toggle Spotify tab</span></div>
             <div class="key-row"><kbd>A</kbd><span>Toggle NASA Space Article tab</span></div>
             <div class="key-row"><kbd>W</kbd><span>Toggle Live News tab</span></div>
+            <div class="key-row"><kbd>E</kbd><span>Toggle Weather & 5-Day Forecast tab</span></div>
             <div class="key-row"><kbd>1</kbd> - <kbd>5</kbd><span>Launch shortcut #1 to #5</span></div>
             <div class="key-row"><kbd>Esc</kbd><span>Close open windows / drawers</span></div>
             <div class="key-row"><kbd>?</kbd><span>Toggle this cheat sheet</span></div>
@@ -187,7 +195,7 @@
         </div>
       </div>
 
-      <!-- Bottom Dock: 3 Tabs (Spotify, NASA, Live News) -->
+      <!-- Bottom Dock: 4 Tabs (Spotify, NASA, Live News, Weather) -->
       <section class="bottom-dock" id="bottom-dock">
         <div class="dock-tabs">
           <button class="dock-tab-btn" id="tab-btn-spotify" type="button" title="Shortcut: M">
@@ -202,22 +210,24 @@
             <span>📰 Live News</span>
             <span class="tab-indicator">▲</span>
           </button>
+          <button class="dock-tab-btn" id="tab-btn-weather" type="button" title="Shortcut: E">
+            <span>🌦️ Weather</span>
+            <span class="tab-indicator">▲</span>
+          </button>
         </div>
 
         <div class="dock-drawer-content" id="dock-drawer-content">
           <!-- Spotify Panel -->
           <div class="dock-panel hidden" id="panel-spotify">
-            <!-- Spotify Presets -->
             <div class="spotify-presets-bar">
               <span class="presets-label">Spotify Vibes:</span>
               <button class="btn-preset" data-uri="37i9dQZF1DXdLEN7aqioXM" type="button">☕ Lo-Fi</button>
               <button class="btn-preset" data-uri="37i9dQZF1DXcBWIGoYBM5M" type="button">🔥 Top Hits</button>
-              <button class="btn-preset" data-uri="37i9dQZF1DXd9rSDyQguIk" type="button">🧠 Deep Focus</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DWZeKCadgRdKQ" type="button">🧠 Deep Focus</button>
               <button class="btn-preset" data-uri="37i9dQZF1DXd9rSDyQguIk" type="button">🌃 Synthwave</button>
               <button class="btn-preset" data-uri="37i9dQZF1DXCF6MNR0TM96" type="button">⚡ Rock</button>
             </div>
 
-            <!-- Custom URL, URI & Name Loader -->
             <div class="spotify-controls">
               <input 
                 type="text" 
@@ -267,6 +277,16 @@
             </div>
             <div id="news-articles-grid" class="news-articles-grid">
               <p class="status-msg">Loading latest headlines...</p>
+            </div>
+          </div>
+
+          <!-- Browser-Style Weather & 5-Day Forecast Panel -->
+          <div class="dock-panel hidden" id="panel-weather">
+            <div id="weather-content" class="weather-content">
+              <div class="weather-prompt-state">
+                <p class="status-msg">Clicking this tab requests your location to show live weather.</p>
+                <button id="btn-request-location" class="btn-dock-action">Detect My Location</button>
+              </div>
             </div>
           </div>
         </div>

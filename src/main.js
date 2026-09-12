@@ -72,43 +72,7 @@ setInterval(updateClocks, 1000);
 updateClocks();
 
 // ==========================================
-// 2. LIVE LOCAL WEATHER (OPEN-METEO)
-// ==========================================
-const weatherDisplays = document.querySelectorAll(".weather-digits");
-
-function loadWeather() {
-  if (!navigator.geolocation) return;
-  
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    try {
-      const { latitude, longitude } = pos.coords;
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
-      const data = await res.json();
-      
-      const temp = Math.round(data.current_weather.temperature);
-      const code = data.current_weather.weathercode;
-      
-      let icon = "🌤️";
-      if (code === 0) icon = "☀️";
-      else if (code <= 3) icon = "⛅";
-      else if (code <= 48) icon = "🌫️";
-      else if (code <= 67) icon = "🌧️";
-      else if (code <= 77) icon = "❄️";
-      else if (code <= 82) icon = "🌦️";
-      else if (code <= 99) icon = "⛈️";
-
-      weatherDisplays.forEach(el => el.textContent = `${temp}°C ${icon}`);
-    } catch (e) {
-      // Silently fail if fetch errors
-    }
-  }, () => {
-    weatherDisplays.forEach(el => el.textContent = `📍 Location disabled`);
-  });
-}
-loadWeather();
-
-// ==========================================
-// 3. WALLPAPER SYSTEM
+// 2. WALLPAPER SYSTEM
 // ==========================================
 const wallpaperInput = document.querySelector("#wallpaper-input");
 const uploadBtn = document.querySelector("#btn-upload-wallpaper");
@@ -214,7 +178,7 @@ if (!isAutoSpace) {
 }
 
 // ==========================================
-// 4. MULTIPLE DRAGGABLE STICKY NOTES
+// 3. MULTIPLE DRAGGABLE STICKY NOTES
 // ==========================================
 const notesContainer = document.querySelector("#notes-container");
 const addNoteBtn = document.querySelector("#btn-add-note");
@@ -350,7 +314,7 @@ addNoteBtn.addEventListener("click", createNewStickyNote);
 renderAllNotes();
 
 // ==========================================
-// 5. LOCAL CALENDAR SYSTEM
+// 4. CALENDAR SYSTEM WITH .ICS IMPORT
 // ==========================================
 const calendarModal = document.querySelector("#calendar-modal");
 const btnCloseCalendar = document.querySelector("#btn-close-calendar");
@@ -366,6 +330,10 @@ const eventTitleInput = document.querySelector("#event-title-input");
 const eventTimeInput = document.querySelector("#event-time-input");
 const btnCancelEvent = document.querySelector("#btn-cancel-event");
 const eventsContainer = document.querySelector("#events-container");
+
+const icsFileInput = document.querySelector("#ics-file-input");
+const btnImportIcs = document.querySelector("#btn-import-ics");
+const icsStatus = document.querySelector("#ics-status");
 
 let calendarDate = new Date();
 let selectedDateStr = new Date().toISOString().split("T")[0];
@@ -513,8 +481,80 @@ eventForm.addEventListener("submit", (e) => {
   renderSelectedDayEvents();
 });
 
+// .ics File Parser
+btnImportIcs.addEventListener("click", () => icsFileInput.click());
+
+icsFileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    parseAndImportICS(evt.target.result);
+    icsFileInput.value = "";
+  };
+  reader.readAsText(file);
+});
+
+function parseAndImportICS(icsRaw) {
+  const unfolded = icsRaw.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
+  const lines = unfolded.split(/\r\n|\n|\r/);
+
+  let inEvent = false;
+  let summary = "";
+  let dtstart = "";
+  let count = 0;
+
+  for (let line of lines) {
+    line = line.trim();
+    if (line === "BEGIN:VEVENT") {
+      inEvent = true;
+      summary = "";
+      dtstart = "";
+    } else if (line === "END:VEVENT") {
+      if (inEvent && summary && dtstart) {
+        const dateMatch = dtstart.match(/(\d{4})(\d{2})(\d{2})/);
+        if (dateMatch) {
+          const dateStr = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+          let timeStr = "All Day";
+          const timeMatch = dtstart.match(/T(\d{2})(\d{2})/);
+          if (timeMatch) {
+            timeStr = `${timeMatch[1]}:${timeMatch[2]}`;
+          }
+
+          if (!calendarEvents[dateStr]) calendarEvents[dateStr] = [];
+
+          if (!calendarEvents[dateStr].find(ev => ev.title === summary && ev.time === timeStr)) {
+            calendarEvents[dateStr].push({ title: summary, time: timeStr });
+            count++;
+          }
+        }
+      }
+      inEvent = false;
+    } else if (inEvent) {
+      if (line.startsWith("SUMMARY")) {
+        const idx = line.indexOf(":");
+        if (idx !== -1) {
+          summary = line.substring(idx + 1).replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\n/g, ' ').trim();
+        }
+      } else if (line.startsWith("DTSTART")) {
+        const idx = line.indexOf(":");
+        if (idx !== -1) {
+          dtstart = line.substring(idx + 1).trim();
+        }
+      }
+    }
+  }
+
+  saveCalendarEvents();
+  renderCalendar();
+  renderSelectedDayEvents();
+  icsStatus.textContent = `✓ Successfully imported ${count} events!`;
+  setTimeout(() => icsStatus.textContent = "", 4000);
+}
+
 // ==========================================
-// 6. SHORTCUTS
+// 5. SHORTCUTS
 // ==========================================
 const DEFAULT_SHORTCUTS = [
   { name: "GitHub", url: "https://github.com" },
@@ -720,16 +760,18 @@ modalOverlay.addEventListener("click", (e) => {
 renderShortcuts();
 
 // ==========================================
-// 7. BOTTOM DOCK (SPOTIFY, NASA, NEWS)
+// 6. BOTTOM DOCK (SPOTIFY, NASA, NEWS, WEATHER)
 // ==========================================
 const bottomDock = document.querySelector("#bottom-dock");
 const tabBtnSpotify = document.querySelector("#tab-btn-spotify");
 const tabBtnSpace = document.querySelector("#tab-btn-space");
 const tabBtnNews = document.querySelector("#tab-btn-news");
+const tabBtnWeather = document.querySelector("#tab-btn-weather");
 
 const panelSpotify = document.querySelector("#panel-spotify");
 const panelSpace = document.querySelector("#panel-space");
 const panelNews = document.querySelector("#panel-news");
+const panelWeather = document.querySelector("#panel-weather");
 const drawerBody = document.querySelector("#drawer-body");
 
 let activeTab = null;
@@ -740,9 +782,12 @@ function toggleDockTab(tabName) {
     tabBtnSpotify.classList.remove("active");
     tabBtnSpace.classList.remove("active");
     tabBtnNews.classList.remove("active");
+    tabBtnWeather.classList.remove("active");
+
     panelSpotify.classList.add("hidden");
     panelSpace.classList.add("hidden");
     panelNews.classList.add("hidden");
+    panelWeather.classList.add("hidden");
     activeTab = null;
   } else {
     bottomDock.classList.add("open");
@@ -751,18 +796,22 @@ function toggleDockTab(tabName) {
     tabBtnSpotify.classList.toggle("active", tabName === "spotify");
     tabBtnSpace.classList.toggle("active", tabName === "space");
     tabBtnNews.classList.toggle("active", tabName === "news");
+    tabBtnWeather.classList.toggle("active", tabName === "weather");
 
     panelSpotify.classList.toggle("hidden", tabName !== "spotify");
     panelSpace.classList.toggle("hidden", tabName !== "space");
     panelNews.classList.toggle("hidden", tabName !== "news");
+    panelWeather.classList.toggle("hidden", tabName !== "weather");
 
     if (tabName === "news") loadNews(currentNewsCat);
+    if (tabName === "weather") requestWeather();
   }
 }
 
 tabBtnSpotify.addEventListener("click", () => toggleDockTab("spotify"));
 tabBtnSpace.addEventListener("click", () => toggleDockTab("space"));
 tabBtnNews.addEventListener("click", () => toggleDockTab("news"));
+tabBtnWeather.addEventListener("click", () => toggleDockTab("weather"));
 
 // --- Spotify Controls ---
 const musicSearchInput = document.querySelector("#music-search-input");
@@ -847,7 +896,7 @@ document.querySelectorAll(".btn-preset").forEach(btn => {
 });
 
 // ==========================================
-// 8. NASA SPACE ARTICLE
+// 7. NASA SPACE ARTICLE
 // ==========================================
 async function fetchSpaceArticle(isRandom = false) {
   const controller = new AbortController();
@@ -971,58 +1020,79 @@ function getDateString(daysAgo = 0) {
 loadSpaceArticle();
 
 // ==========================================
-// 9. LIVE NEWS FEED
+// 8. LIVE NEWS FEED (UP-TO-THE-MINUTE RSS BRIDGE)
 // ==========================================
 const newsArticlesGrid = document.querySelector("#news-articles-grid");
-let currentNewsCat = "general";
+let currentNewsCat = "top";
 
-const NEWS_TOPIC_MAP = {
-  top: "general",
-  business: "business",
-  technology: "technology",
-  entertainment: "entertainment",
-  science: "science",
-  sports: "sports"
+const NEWS_FEEDS = {
+  top: "https://feeds.bbci.co.uk/news/rss.xml",
+  business: "https://feeds.bbci.co.uk/news/business/rss.xml",
+  technology: "https://feeds.bbci.co.uk/news/technology/rss.xml",
+  entertainment: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+  science: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+  sports: "https://feeds.bbci.co.uk/sport/rss.xml"
 };
+
+const NEWS_FALLBACKS = {
+  top: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=80",
+  business: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80",
+  technology: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
+  entertainment: "https://images.unsplash.com/photo-1603190287605-e6ade32fa852?w=600&q=80",
+  science: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80",
+  sports: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=80"
+};
+
+function extractImage(item, category) {
+  if (item.thumbnail && typeof item.thumbnail === "string" && item.thumbnail.startsWith("http")) {
+    return item.thumbnail;
+  }
+  if (item.enclosure && item.enclosure.link && item.enclosure.link.startsWith("http")) {
+    return item.enclosure.link;
+  }
+  const match = (item.description || "").match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (match && match[1]) return match[1];
+
+  return NEWS_FALLBACKS[category] || NEWS_FALLBACKS.top;
+}
 
 async function loadNews(category = "top") {
   newsArticlesGrid.innerHTML = `<p class="status-msg">Fetching live headlines...</p>`;
 
-  const catStr = NEWS_TOPIC_MAP[category] || "general";
-  const endpoint = `https://saurav.tech/NewsAPI/top-headlines/category/${catStr}/us.json`;
+  const feedUrl = NEWS_FEEDS[category] || NEWS_FEEDS.top;
+  const endpoint = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
 
   try {
     const res = await fetch(endpoint);
     const data = await res.json();
 
-    if (!data.articles || data.articles.length === 0) {
-      newsArticlesGrid.innerHTML = `<p class="status-msg">No articles found in this category.</p>`;
+    if (!data.items || data.items.length === 0) {
+      newsArticlesGrid.innerHTML = `<p class="status-msg">No recent articles found in this category.</p>`;
       return;
     }
 
     newsArticlesGrid.innerHTML = "";
-    
-    const validArticles = data.articles.filter(item => item.title && !item.title.includes("[Removed]"));
 
-    validArticles.slice(0, 9).forEach((item) => {
+    data.items.slice(0, 9).forEach((item) => {
       const card = document.createElement("a");
       card.className = "news-card";
-      card.href = item.url;
+      card.href = item.link;
       card.target = "_blank";
       card.rel = "noopener noreferrer";
 
-      const pubDate = new Date(item.publishedAt).toLocaleDateString(undefined, {
+      const pubDate = item.pubDate ? new Date(item.pubDate).toLocaleDateString(undefined, {
         month: "short",
         day: "numeric"
-      });
+      }) : "Recent";
 
-      const imageUrl = item.urlToImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80';
+      const imageUrl = extractImage(item, category);
+      const title = (item.title || "Headline").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 
       card.innerHTML = `
-        <img src="${imageUrl}" class="news-card-img" alt="News Image" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&q=80'" />
-        <div class="news-card-title">${item.title}</div>
+        <img src="${imageUrl}" class="news-card-img" alt="News Image" onerror="this.src='${NEWS_FALLBACKS[category]}'" />
+        <div class="news-card-title">${title}</div>
         <div class="news-card-footer">
-          <span>${item.source?.name || "News"}</span>
+          <span>${data.feed?.title || "News"}</span>
           <span>${pubDate}</span>
         </div>
       `;
@@ -1030,7 +1100,7 @@ async function loadNews(category = "top") {
       newsArticlesGrid.appendChild(card);
     });
   } catch (err) {
-    newsArticlesGrid.innerHTML = `<p class="status-msg">Could not load news feed: ${err.message}</p>`;
+    newsArticlesGrid.innerHTML = `<p class="status-msg">Could not load live news feed: ${err.message}</p>`;
   }
 }
 
@@ -1042,6 +1112,181 @@ document.querySelectorAll(".btn-news-cat").forEach(btn => {
     loadNews(currentNewsCat);
   });
 });
+
+// ==========================================
+// 9. BROWSER-STYLE WEATHER & 5-DAY FORECAST
+// ==========================================
+const weatherContent = document.querySelector("#weather-content");
+let cachedWeatherData = null;
+
+function getWeatherMeta(code) {
+  const map = {
+    0: { text: "Clear Sky", icon: "☀️" },
+    1: { text: "Mainly Clear", icon: "🌤️" },
+    2: { text: "Partly Cloudy", icon: "⛅" },
+    3: { text: "Overcast", icon: "☁️" },
+    45: { text: "Foggy", icon: "🌫️" },
+    48: { text: "Depositing Rime Fog", icon: "🌫️" },
+    51: { text: "Light Drizzle", icon: "🌦️" },
+    53: { text: "Moderate Drizzle", icon: "🌦️" },
+    55: { text: "Dense Drizzle", icon: "🌧️" },
+    56: { text: "Freezing Drizzle", icon: "🌨️" },
+    61: { text: "Slight Rain", icon: "🌧️" },
+    63: { text: "Moderate Rain", icon: "🌧️" },
+    65: { text: "Heavy Rain", icon: "🌧️" },
+    71: { text: "Slight Snow", icon: "🌨️" },
+    73: { text: "Moderate Snow", icon: "❄️" },
+    75: { text: "Heavy Snow", icon: "❄️" },
+    80: { text: "Rain Showers", icon: "🌦️" },
+    81: { text: "Heavy Showers", icon: "🌧️" },
+    82: { text: "Violent Showers", icon: "⛈️" },
+    95: { text: "Thunderstorm", icon: "⛈️" },
+    96: { text: "Thunderstorm + Hail", icon: "⛈️" }
+  };
+  return map[code] || { text: "Cloudy", icon: "🌤️" };
+}
+
+function requestWeather() {
+  if (cachedWeatherData) {
+    renderWeather(cachedWeatherData);
+    return;
+  }
+
+  weatherContent.innerHTML = `<p class="status-msg">Detecting location & fetching forecast...</p>`;
+
+  if (!navigator.geolocation) {
+    weatherContent.innerHTML = `<p class="status-msg">Geolocation is not supported by your browser.</p>`;
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=auto`;
+
+        const [res, geoRes] = await Promise.all([
+          fetch(url),
+          fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}`).catch(() => null)
+        ]);
+
+        const data = await res.json();
+        let city = "Local Area";
+        if (geoRes && geoRes.ok) {
+          const geoData = await geoRes.json();
+          city = geoData.city || geoData.locality || geoData.countryName || "Local Area";
+        }
+
+        data._locationName = city;
+        cachedWeatherData = data;
+        renderWeather(data);
+      } catch (err) {
+        weatherContent.innerHTML = `
+          <div class="weather-prompt-state">
+            <p class="status-msg">Could not load weather data (${err.message}).</p>
+            <button id="btn-retry-weather" class="btn-dock-action">Retry</button>
+          </div>
+        `;
+        document.querySelector("#btn-retry-weather")?.addEventListener("click", () => {
+          cachedWeatherData = null;
+          requestWeather();
+        });
+      }
+    },
+    (err) => {
+      weatherContent.innerHTML = `
+        <div class="weather-prompt-state">
+          <p class="status-msg">📍 Location permission was denied. Please allow location access to view weather.</p>
+          <button id="btn-grant-weather" class="btn-dock-action">Try Again</button>
+        </div>
+      `;
+      document.querySelector("#btn-grant-weather")?.addEventListener("click", () => {
+        cachedWeatherData = null;
+        requestWeather();
+      });
+    }
+  );
+}
+
+function renderWeather(data) {
+  const cur = data.current;
+  const curMeta = getWeatherMeta(cur.weather_code);
+  const temp = Math.round(cur.temperature_2m);
+  const feelsLike = Math.round(cur.apparent_temperature);
+  const humidity = cur.relative_humidity_2m;
+  const wind = Math.round(cur.wind_speed_10m);
+  const todayPrecip = data.daily.precipitation_probability_max[0] || 0;
+  const todayMax = Math.round(data.daily.temperature_2m_max[0]);
+  const todayMin = Math.round(data.daily.temperature_2m_min[0]);
+
+  // Build 5-Day Daily Cards
+  let forecastCardsHtml = "";
+  for (let i = 1; i <= 5; i++) {
+    if (!data.daily.time[i]) break;
+    const dateObj = new Date(data.daily.time[i] + "T00:00:00");
+    const dayName = dateObj.toLocaleDateString(undefined, { weekday: "short" });
+    const dateFormatted = dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const dayCode = data.daily.weather_code[i];
+    const dayMeta = getWeatherMeta(dayCode);
+    const maxT = Math.round(data.daily.temperature_2m_max[i]);
+    const minT = Math.round(data.daily.temperature_2m_min[i]);
+    const rainP = data.daily.precipitation_probability_max[i] || 0;
+    const dayWind = Math.round(data.daily.wind_speed_10m_max[i] || 0);
+
+    forecastCardsHtml += `
+      <div class="forecast-card">
+        <span class="forecast-day-name">${dayName}</span>
+        <span class="forecast-date">${dateFormatted}</span>
+        <span class="forecast-icon">${dayMeta.icon}</span>
+        <span class="forecast-condition">${dayMeta.text}</span>
+        <span class="forecast-hi-lo">${maxT}° / ${minT}°</span>
+        <span class="forecast-rain">💧 ${rainP}%</span>
+        <span class="forecast-wind">💨 ${dayWind} km/h</span>
+      </div>
+    `;
+  }
+
+  weatherContent.innerHTML = `
+    <div class="weather-today-card">
+      <div class="weather-today-left">
+        <div class="weather-huge-icon">${curMeta.icon}</div>
+        <div class="weather-today-temp-box">
+          <div class="weather-today-temp">${temp}°C</div>
+          <div class="weather-today-condition">${curMeta.text}</div>
+          <span class="weather-location-label">📍 ${data._locationName || "Local Area"}</span>
+        </div>
+      </div>
+
+      <div class="weather-metrics-grid">
+        <div class="weather-metric-tile">
+          <span class="metric-label">Feels Like</span>
+          <span class="metric-val">${feelsLike}°C</span>
+        </div>
+        <div class="weather-metric-tile">
+          <span class="metric-label">Precipitation</span>
+          <span class="metric-val">💧 ${todayPrecip}%</span>
+        </div>
+        <div class="weather-metric-tile">
+          <span class="metric-label">Wind Speed</span>
+          <span class="metric-val">💨 ${wind} km/h</span>
+        </div>
+        <div class="weather-metric-tile">
+          <span class="metric-label">Humidity</span>
+          <span class="metric-val">💦 ${humidity}%</span>
+        </div>
+        <div class="weather-metric-tile">
+          <span class="metric-label">Day Range</span>
+          <span class="metric-val">${todayMax}° / ${todayMin}°</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="weather-forecast-heading">5-Day Weather Forecast</div>
+    <div class="weather-forecast-grid">
+      ${forecastCardsHtml}
+    </div>
+  `;
+}
 
 // ==========================================
 // 10. GLOBAL KEYBOARD SHORTCUTS
@@ -1072,9 +1317,11 @@ window.addEventListener("keydown", (e) => {
     tabBtnSpotify.classList.remove("active");
     tabBtnSpace.classList.remove("active");
     tabBtnNews.classList.remove("active");
+    tabBtnWeather.classList.remove("active");
     panelSpotify.classList.add("hidden");
     panelSpace.classList.add("hidden");
     panelNews.classList.add("hidden");
+    panelWeather.classList.add("hidden");
     activeTab = null;
     if (isTyping) document.activeElement.blur();
     return;
@@ -1122,6 +1369,12 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "w" || e.key === "W") {
     e.preventDefault();
     toggleDockTab("news");
+    return;
+  }
+
+  if (e.key === "e" || e.key === "E") {
+    e.preventDefault();
+    toggleDockTab("weather");
     return;
   }
 

@@ -176,7 +176,7 @@ body.default-bg {
   color: #cbd5e1;
 }
 
-/* --- Multiple Draggable Sticky Notes --- */
+/* --- Sticky Notes --- */
 .sticky-note-card {
   position: fixed;
   width: min(290px, 86vw);
@@ -273,7 +273,7 @@ body.default-bg {
   max-width: 650px;
 }
 
-/* --- Digital Clock & Weather --- */
+/* --- Digital Clock --- */
 .digital-container {
   display: flex;
   flex-direction: column;
@@ -288,35 +288,24 @@ body.default-bg {
   text-shadow: 0 0 30px rgba(56, 189, 248, 0.35);
 }
 
-.date-weather-row {
+.date-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
   margin-top: 0.5rem;
 }
 
 .date-digits {
   font-family: 'Orbitron', sans-serif;
-  font-size: clamp(0.8rem, 1.8vw, 1.05rem);
+  font-size: clamp(0.85rem, 1.8vw, 1.1rem);
   color: #94a3b8;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 
-.weather-digits {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(0.8rem, 1.8vw, 1.05rem);
-  color: #38bdf8;
-  letter-spacing: 1px;
-  cursor: help;
-  padding: 4px 8px;
-  background: rgba(56, 189, 248, 0.1);
-  border-radius: 8px;
-}
-
 .clickable-date {
   cursor: pointer;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
@@ -411,7 +400,7 @@ body.default-bg {
   display: none !important;
 }
 
-/* --- Google Search Bar --- */
+/* --- Search Bar --- */
 .search-form {
   position: relative;
   width: 100%;
@@ -612,7 +601,7 @@ body.default-bg {
   pointer-events: none;
 }
 
-/* --- Modal Overlays & Cards --- */
+/* --- Modals --- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -906,7 +895,48 @@ body.default-bg {
   margin: 0.5rem 0;
 }
 
-/* --- Unified Bottom Dock (3 Tabs) --- */
+/* Local .ics Calendar Import Styling */
+.ics-import-box {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-import-ics {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-import-ics:hover {
+  background: #38bdf8;
+  color: #08090e;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.ics-status {
+  font-size: 0.75rem;
+  color: #38bdf8;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* --- Unified Bottom Dock (4 Tabs) --- */
 .bottom-dock {
   position: fixed;
   bottom: 0;
@@ -942,12 +972,12 @@ body.default-bg {
   border: none;
   color: #94a3b8;
   font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   cursor: pointer;
   transition: all 0.2s ease;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -983,7 +1013,7 @@ body.default-bg {
   max-height: calc(90vh - 48px);
 }
 
-/* In-Tab Spotify Search & Presets */
+/* Spotify Tab Styles */
 .spotify-presets-bar {
   display: flex;
   align-items: center;
@@ -1117,7 +1147,7 @@ body.default-bg {
   background: #121212;
 }
 
-/* --- Live News Panel & Categories --- */
+/* --- Live News Feed Styles --- */
 .news-categories-bar {
   display: flex;
   gap: 0.5rem;
@@ -1199,6 +1229,169 @@ body.default-bg {
   font-size: 0.72rem;
   color: #94a3b8;
   margin-top: 0.5rem;
+}
+
+/* --- Browser-Style Weather Section --- */
+.weather-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.weather-prompt-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.weather-today-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  padding: 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.weather-today-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.weather-huge-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.weather-today-temp-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-today-temp {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.weather-today-condition {
+  font-size: 1rem;
+  color: #38bdf8;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.weather-location-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.weather-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.weather-metric-tile {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.metric-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.weather-forecast-heading {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  color: #38bdf8;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.weather-forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+}
+
+.forecast-card {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.85rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.forecast-day-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.forecast-date {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.forecast-icon {
+  font-size: 1.8rem;
+  margin: 0.2rem 0;
+}
+
+.forecast-condition {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.forecast-hi-lo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.forecast-rain {
+  font-size: 0.72rem;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.forecast-wind {
+  font-size: 0.7rem;
+  color: #94a3b8;
 }
 
 /* --- NASA Drawer Panel Styles --- */
