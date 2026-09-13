@@ -52,10 +52,10 @@ Press the hotkeys or click the drawer tabs at the bottom to slide out dedicated 
 
 | Tab | Hotkey | Description |
 | :--- | :---: | :--- |
-| ** Spotify** | <kbd>M</kbd> | Embed player that includes 5 presets and also allows you to put your own spotify playlists or songs by pasting their link! |
-| ** NASA Space** | <kbd>A</kbd> | Read the daily astronomy article , click for a random surprise article , or set the current photo as your wallpaper. |
-| ** Live News** | <kbd>W</kbd> | Live News tab that spans across 6 categories: *General, Finance, Tech, Entertainment, Science, and Sports*. |
-| ** Weather** | <kbd>E</kbd> | Weather tab that displays current temp, feels-like, wind speed, humidity, precipitation chance, and a full 5-day daily forecast. |
+| **Spotify** | <kbd>M</kbd> | Embed player that includes 5 presets and also allows you to put your own spotify playlists or songs by pasting their link! |
+| **NASA Space** | <kbd>A</kbd> | Read the daily astronomy article , click for a random surprise article , or set the current photo as your wallpaper. |
+| **Live News** | <kbd>W</kbd> | Live News tab that spans across 6 categories: *General, Finance, Tech, Entertainment, Science, and Sports*. |
+| **Weather** | <kbd>E</kbd> | Weather tab that displays current temp, feels-like, wind speed, humidity, precipitation chance, and a full 5-day daily forecast. |
 
 
 ## ⌨️ Keyboard Shortcuts
