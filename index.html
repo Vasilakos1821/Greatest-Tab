@@ -19,17 +19,18 @@
 
       <!-- Top-Right Controls: Notes, Shortcuts Help & Wallpaper -->
       <div class="top-controls-right">
-        <button id="btn-shortcuts-help" class="control-btn" type="button" title="View Keyboard Shortcuts (Press ?)">
-          ⌨️ Keyboard Shortcuts
+        <button id="btn-add-note" class="control-btn note-btn" type="button" title="Create Note (Press N)">
+          Sticky Note
         </button>
 
-        <button id="btn-add-note" class="control-btn note-btn" type="button" title="Create Note (Press N)">
-          ➕ Note
+        <button id="btn-shortcuts-help" class="control-btn" type="button" title="View Keyboard Shortcuts (Press ?)">
+           Keyboard Shortcuts
         </button>
+        
 
         <input type="file" id="wallpaper-input" accept="image/*" hidden />
         <button id="btn-upload-wallpaper" class="control-btn" type="button" title="Upload Custom Wallpaper">
-          🖼️ Wallpaper
+          Choose Wallpaper
         </button>
 
         <label class="space-switch" title="Automatically set NASA's daily space photo as your wallpaper">
@@ -178,7 +179,7 @@
       <!-- Keyboard Shortcuts Cheat Sheet Modal -->
       <div class="modal-overlay hidden" id="keys-help-modal">
         <div class="modal-card keys-help-card">
-          <h3>⌨️ Keyboard Shortcuts</h3>
+          <h3>Keyboard Shortcuts</h3>
           <div class="keys-grid">
             <div class="key-row"><kbd>/</kbd><span>Focus Google search bar</span></div>
             <div class="key-row"><kbd>N</kbd><span>Create a new sticky note</span></div>
@@ -199,19 +200,19 @@
       <section class="bottom-dock" id="bottom-dock">
         <div class="dock-tabs">
           <button class="dock-tab-btn" id="tab-btn-spotify" type="button" title="Shortcut: M">
-            <span>🎵 Spotify</span>
+            <span>Spotify</span>
             <span class="tab-indicator">▲</span>
           </button>
           <button class="dock-tab-btn" id="tab-btn-space" type="button" title="Shortcut: A">
-            <span>🔭 NASA Space Article</span>
+            <span>NASA Space Article</span>
             <span class="tab-indicator">▲</span>
           </button>
           <button class="dock-tab-btn" id="tab-btn-news" type="button" title="Shortcut: W">
-            <span>📰 Live News</span>
+            <span>Live News</span>
             <span class="tab-indicator">▲</span>
           </button>
           <button class="dock-tab-btn" id="tab-btn-weather" type="button" title="Shortcut: E">
-            <span>🌦️ Weather</span>
+            <span>Weather</span>
             <span class="tab-indicator">▲</span>
           </button>
         </div>
@@ -221,11 +222,11 @@
           <div class="dock-panel hidden" id="panel-spotify">
             <div class="spotify-presets-bar">
               <span class="presets-label">Spotify Vibes:</span>
-              <button class="btn-preset" data-uri="37i9dQZF1DXdLEN7aqioXM" type="button">☕ Lo-Fi</button>
-              <button class="btn-preset" data-uri="37i9dQZF1DXcBWIGoYBM5M" type="button">🔥 Top Hits</button>
-              <button class="btn-preset" data-uri="37i9dQZF1DWZeKCadgRdKQ" type="button">🧠 Deep Focus</button>
-              <button class="btn-preset" data-uri="37i9dQZF1DXd9rSDyQguIk" type="button">🌃 Synthwave</button>
-              <button class="btn-preset" data-uri="37i9dQZF1DXCF6MNR0TM96" type="button">⚡ Rock</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXdLEN7aqioXM" type="button">Lo-Fi</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXcBWIGoYBM5M" type="button">Top Hits</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DWZeKCadgRdKQ" type="button">Deep Focus</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXd9rSDyQguIk" type="button"> Synthwave</button>
+              <button class="btn-preset" data-uri="37i9dQZF1DXCF6MNR0TM96" type="button"> Rock</button>
             </div>
 
             <div class="spotify-controls">
@@ -238,7 +239,7 @@
               <button id="btn-search-music" type="button" class="btn-dock-action">Search / Load</button>
               <button id="btn-default-spotify" type="button" class="btn-dock-secondary" title="Reset to default lofi playlist">Reset</button>
               <a href="https://accounts.spotify.com/login" target="_blank" rel="noopener noreferrer" class="btn-dock-login" title="Log in to Spotify for uninterrupted full songs">
-                🔑 Spotify Login
+                Spotify Login
               </a>
             </div>
 
@@ -268,12 +269,12 @@
           <!-- Live Categorized News Panel -->
           <div class="dock-panel hidden" id="panel-news">
             <div class="news-categories-bar">
-              <button class="btn-news-cat active" data-cat="top">🌐 General</button>
-              <button class="btn-news-cat" data-cat="business">💼 Finance</button>
-              <button class="btn-news-cat" data-cat="technology">💻 Tech</button>
-              <button class="btn-news-cat" data-cat="entertainment">🎬 Entertainment</button>
-              <button class="btn-news-cat" data-cat="science">🚀 Science</button>
-              <button class="btn-news-cat" data-cat="sports">⚽ Sports</button>
+              <button class="btn-news-cat active" data-cat="top"> General</button>
+              <button class="btn-news-cat" data-cat="business"> Finance</button>
+              <button class="btn-news-cat" data-cat="technology"> Tech</button>
+              <button class="btn-news-cat" data-cat="entertainment"> Entertainment</button>
+              <button class="btn-news-cat" data-cat="science"> Science</button>
+              <button class="btn-news-cat" data-cat="sports"> Sports</button>
             </div>
             <div id="news-articles-grid" class="news-articles-grid">
               <p class="status-msg">Loading latest headlines...</p>

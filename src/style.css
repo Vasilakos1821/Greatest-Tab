@@ -18,7 +18,7 @@ body {
 }
 
 body.default-bg {
-  background: radial-gradient(circle at center, #1b2032 0%, #08090e 100%);
+  background: linear-gradient(135deg, #05050d 0%, #1e1035 40%, #5b21b6 75%, #c026d3 100%);
 }
 
 #app {
@@ -37,9 +37,8 @@ body.default-bg {
   top: 1.25rem;
   left: 1.25rem;
   display: flex;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
+  background: rgba(35, 2, 66, 0.75);
+  border: 3px solid rgb(128, 0, 255);
   padding: 3px;
   backdrop-filter: blur(10px);
   z-index: 20;
@@ -48,18 +47,17 @@ body.default-bg {
 .toggle-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
+  color: #4d0ab9;
+  font-family: 'Garamond', sans-serif;
+  font-size: 1rem;
   font-weight: 700;
   padding: 6px 14px;
-  border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .toggle-btn.active {
-  background: #38bdf8;
+  background: #860695;
   color: #08090e;
 }
 
@@ -76,36 +74,36 @@ body.default-bg {
   justify-content: flex-end;
 }
 
+.control-btn.note-btn {
+  border-color: rgba(229, 10, 79, 0.4);
+  color: #f95300;
+}
+
+.control-btn.note-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #810d3f;
+  color: #ff7606;
+}
+
 .control-btn {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #cbd5e1;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.72rem;
+  background:rgba(35, 2, 66, 0.75);
+  border: 3px solid rgb(128, 0, 255);
+  color: #6200ff;
+  font-family: 'Garamond', sans-serif;
+  font-size: 1rem;
   font-weight: 700;
   padding: 6px 12px;
-  border-radius: 16px;
   backdrop-filter: blur(10px);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .control-btn:hover {
-  background: rgba(56, 189, 248, 0.2);
-  border-color: #38bdf8;
-  color: #ffffff;
+  background: rgba(213, 0, 255, 0.2);
+  border-color: #cc00fa;
+  color: #ff01d0;
 }
 
-.control-btn.note-btn {
-  border-color: rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
-}
-
-.control-btn.note-btn:hover {
-  background: rgba(245, 158, 11, 0.2);
-  border-color: #fbbf24;
-  color: #ffffff;
-}
 
 #btn-reset-wallpaper {
   padding: 6px 10px;
@@ -120,19 +118,17 @@ body.default-bg {
 .space-switch {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
+  gap: 0.3rem;
+  background: rgba(35, 2, 66, 0.75);
+  border: 3px solid rgb(128, 0, 255);
   padding: 4px 10px 4px 6px;
-  backdrop-filter: blur(10px);
   cursor: pointer;
   user-select: none;
   transition: border-color 0.2s ease;
 }
 
 .space-switch:hover {
-  border-color: #38bdf8;
+  border-color: #cc00fa;
 }
 
 .space-switch input {
@@ -142,8 +138,7 @@ body.default-bg {
 .switch-slider {
   width: 28px;
   height: 16px;
-  background-color: #334155;
-  border-radius: 20px;
+  background-color: #710687;
   position: relative;
   transition: background-color 0.25s ease;
 }
@@ -155,33 +150,32 @@ body.default-bg {
   height: 12px;
   left: 2px;
   top: 2px;
-  background-color: #ffffff;
-  border-radius: 50%;
+  background-color: #ff00ea;
   transition: transform 0.25s ease;
 }
 
 .space-switch input:checked + .switch-slider {
-  background-color: #38bdf8;
+  background-color: #d00981;
 }
 
 .space-switch input:checked + .switch-slider::before {
   transform: translateX(12px);
-  background-color: #08090e;
+  background-color: #ff00ea;
 }
 
 .switch-label {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.72rem;
+  font-family: 'Garamond', sans-serif;
+  font-size: 1rem;
   font-weight: 700;
-  color: #cbd5e1;
+  color: #6200ff;
 }
 
 /* --- Sticky Notes --- */
 .sticky-note-card {
   position: fixed;
   width: min(290px, 86vw);
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 16px rgba(245, 158, 11, 0.12);
   backdrop-filter: blur(14px);
@@ -203,11 +197,11 @@ body.default-bg {
   justify-content: space-between;
   align-items: center;
   padding: 0.55rem 0.8rem;
-  background: rgba(245, 158, 11, 0.14);
+  background: #9b5d07;
   border-bottom: 1px solid rgba(245, 158, 11, 0.25);
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.74rem;
-  color: #fbbf24;
+  font-family: 'Garamond', sans-serif;
+  font-size: 1rem;
+  color: #ffe100;
   font-weight: 700;
   cursor: grab;
   user-select: none;
@@ -281,11 +275,12 @@ body.default-bg {
 }
 
 .clock-digits {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
+  color: #ffffff;
   font-size: clamp(3.2rem, 10vw, 6.2rem);
   font-weight: 900;
   letter-spacing: 4px;
-  text-shadow: 0 0 30px rgba(56, 189, 248, 0.35);
+  text-shadow: 0 0 30px rgba(230, 9, 83, 0.35);
 }
 
 .date-row {
@@ -296,9 +291,9 @@ body.default-bg {
 }
 
 .date-digits {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: clamp(0.85rem, 1.8vw, 1.1rem);
-  color: #94a3b8;
+  color: #ffffff;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -311,9 +306,9 @@ body.default-bg {
 }
 
 .clickable-date:hover {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
-  text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  color: #e60953;
+  background: rgba(230, 9, 83, 0.1);
+  text-shadow: 0 0 10px rgba(230, 9, 83, 0.4);
 }
 
 /* --- Analog Clock --- */
@@ -328,7 +323,7 @@ body.default-bg {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: #000000;
+  background: #0f172a;
   border: 4px solid #27272a;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.03);
   position: relative;
@@ -345,8 +340,8 @@ body.default-bg {
 .clock-number span {
   display: inline-block;
   transform: rotate(calc(-30deg * var(--i)));
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.78rem;
+  font-family: 'Garamond', sans-serif;
+  font-size: 1rem;
   font-weight: 800;
   color: #a1a1aa;
 }
@@ -421,7 +416,6 @@ body.default-bg {
   padding: 0 1.5rem 0 3.25rem;
   background: rgba(15, 23, 42, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 28px;
   color: #ffffff;
   font-size: 1rem;
   outline: none;
@@ -432,12 +426,12 @@ body.default-bg {
 
 .search-form input:focus {
   background: rgba(15, 23, 42, 0.95);
-  border-color: #38bdf8;
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+  border-color: #da3ba0;
+  box-shadow: 0 0 20px rgba(230, 9, 83, 0.35);
 }
 
 .search-form input::placeholder {
-  color: #64748b;
+  color: #967b9c;
 }
 
 /* --- Shortcuts Grid --- */
@@ -485,8 +479,8 @@ body.default-bg {
 }
 
 .shortcut-slot.drag-over {
-  border: 1px dashed #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
+  border: 1px dashed #da3ba0;
+  background: rgba(230, 9, 149, 0.253);
   transform: scale(1.05);
 }
 
@@ -499,7 +493,7 @@ body.default-bg {
   border-radius: 50%;
   background: rgba(30, 41, 59, 0.85);
   border: none;
-  color: #94a3b8;
+  color: #a307dc;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -515,7 +509,7 @@ body.default-bg {
 }
 
 .shortcut-menu-btn:hover {
-  background: #38bdf8;
+  background: #e9d5ff;
   color: #08090e;
 }
 
@@ -553,7 +547,7 @@ body.default-bg {
 
 .shortcut-dropdown button:hover {
   background: #1e293b;
-  color: #38bdf8;
+  color: #da3ba0;
 }
 
 .shortcut-dropdown button.delete-btn:hover {
@@ -624,9 +618,9 @@ body.default-bg {
 
 .modal-card h3 {
   margin: 0 0 1.25rem;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', serif;
   font-size: 1rem;
-  color: #38bdf8;
+  color: #4d0ab9;
 }
 
 .modal-card label {
@@ -651,7 +645,7 @@ body.default-bg {
 }
 
 .modal-card input:focus {
-  border-color: #38bdf8;
+  border-color: #4d0ab9;
 }
 
 .modal-actions {
@@ -690,7 +684,7 @@ body.default-bg {
   border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 4px;
   padding: 2px 8px;
-  font-family: 'Orbitron', monospace;
+  font-family: 'Garamond', monospace;
   font-size: 0.75rem;
   color: #38bdf8;
   font-weight: 700;
@@ -744,7 +738,7 @@ body.default-bg {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.72rem;
   color: #94a3b8;
   margin-bottom: 0.5rem;
@@ -772,7 +766,7 @@ body.default-bg {
 }
 
 .cal-day:hover {
-  background: rgba(56, 189, 248, 0.2);
+  background: rgba(77, 10, 185, 0.2);
 }
 
 .cal-day.empty {
@@ -781,13 +775,13 @@ body.default-bg {
 }
 
 .cal-day.today {
-  border: 1px solid #38bdf8;
-  color: #38bdf8;
+  border: 1px solid #4d0ab9;
+  color: #4d0ab9;
   font-weight: 700;
 }
 
 .cal-day.selected {
-  background: #38bdf8;
+  background: #4d0ab9;
   color: #08090e;
   font-weight: 800;
 }
@@ -817,15 +811,15 @@ body.default-bg {
 
 .events-list-header h4 {
   margin: 0;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.85rem;
-  color: #38bdf8;
+  color: #4d0ab9;
 }
 
 .btn-mini-action {
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid #38bdf8;
-  color: #38bdf8;
+  background: rgba(77, 10, 185, 0.15);
+  border: 1px solid #4d0ab9;
+  color: #4d0ab9;
   border-radius: 6px;
   padding: 4px 8px;
   font-size: 0.75rem;
@@ -877,7 +871,7 @@ body.default-bg {
 
 .event-time {
   color: #94a3b8;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.72rem;
 }
 
@@ -906,10 +900,10 @@ body.default-bg {
 }
 
 .btn-import-ics {
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid #38bdf8;
-  color: #38bdf8;
-  font-family: 'Orbitron', sans-serif;
+  background: rgba(77, 10, 185, 0.15);
+  border: 1px solid #4d0ab9;
+  color: #4d0ab9;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.78rem;
   font-weight: 700;
   padding: 8px 16px;
@@ -924,14 +918,14 @@ body.default-bg {
 }
 
 .btn-import-ics:hover {
-  background: #38bdf8;
+  background: #4d0ab9;
   color: #08090e;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 15px rgba(77, 10, 185, 0.4);
 }
 
 .ics-status {
   font-size: 0.75rem;
-  color: #38bdf8;
+  color: #4d0ab9;
   text-align: center;
   font-weight: 600;
 }
@@ -971,7 +965,7 @@ body.default-bg {
   background: transparent;
   border: none;
   color: #94a3b8;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.74rem;
   font-weight: 700;
   display: flex;
@@ -993,8 +987,8 @@ body.default-bg {
 }
 
 .dock-tab-btn.active {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.08);
+  color: #4d0ab9;
+  background: rgba(77, 10, 185, 0.08);
 }
 
 .tab-indicator {
@@ -1023,7 +1017,7 @@ body.default-bg {
 }
 
 .presets-label {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.72rem;
   color: #94a3b8;
   font-weight: 700;
@@ -1041,8 +1035,8 @@ body.default-bg {
 }
 
 .btn-preset:hover {
-  background: rgba(29, 185, 84, 0.2);
-  border-color: #1db954;
+  background: rgba(77, 10, 185, 0.2);
+  border-color: #4d0ab9;
   color: #ffffff;
 }
 
@@ -1072,10 +1066,10 @@ body.default-bg {
 }
 
 .btn-dock-action {
-  background: #1db954;
+  background: #4d0ab9;
   border: none;
   color: #08090e;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.75rem;
   font-weight: 800;
   padding: 0 1rem;
@@ -1093,7 +1087,7 @@ body.default-bg {
   background: #334155;
   border: none;
   color: #cbd5e1;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0 0.8rem;
@@ -1111,10 +1105,10 @@ body.default-bg {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  background: rgba(29, 185, 84, 0.15);
-  border: 1px solid #1db954;
-  color: #1db954;
-  font-family: 'Orbitron', sans-serif;
+  background: rgba(77, 10, 185, 0.15);
+  border: 1px solid #4d0ab9;
+  color: #4d0ab9;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0 0.9rem;
@@ -1125,18 +1119,18 @@ body.default-bg {
 }
 
 .btn-dock-login:hover {
-  background: #1db954;
+  background: #4d0ab9;
   color: #08090e;
-  box-shadow: 0 0 15px rgba(29, 185, 84, 0.4);
+  box-shadow: 0 0 15px rgba(77, 10, 185, 0.4);
 }
 
 .spotify-feedback {
   font-size: 0.78rem;
-  color: #38bdf8;
+  color: #4d0ab9;
   margin-bottom: 0.75rem;
   padding: 6px 10px;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(77, 10, 185, 0.1);
+  border: 1px solid rgba(77, 10, 185, 0.25);
   border-radius: 6px;
 }
 
@@ -1160,7 +1154,7 @@ body.default-bg {
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #cbd5e1;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   padding: 6px 12px;
@@ -1171,14 +1165,14 @@ body.default-bg {
 }
 
 .btn-news-cat:hover {
-  border-color: #38bdf8;
+  border-color: #4d0ab9;
   color: #fff;
 }
 
 .btn-news-cat.active {
-  background: #38bdf8;
+  background: #4d0ab9 ;
   color: #08090e;
-  border-color: #38bdf8;
+  border-color: #4d0ab9;
 }
 
 .news-articles-grid {
@@ -1201,7 +1195,7 @@ body.default-bg {
 
 .news-card:hover {
   transform: translateY(-3px);
-  border-color: #38bdf8;
+  border-color: #4d0ab9;
   background: rgba(30, 41, 59, 0.9);
 }
 
@@ -1251,7 +1245,7 @@ body.default-bg {
   flex-wrap: wrap;
   gap: 1.5rem;
   background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  border: 1px solid rgba(77, 10, 185, 0.25);
   border-radius: 14px;
   padding: 1.25rem;
   align-items: center;
@@ -1275,7 +1269,7 @@ body.default-bg {
 }
 
 .weather-today-temp {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 2.8rem;
   font-weight: 900;
   color: #ffffff;
@@ -1284,7 +1278,7 @@ body.default-bg {
 
 .weather-today-condition {
   font-size: 1rem;
-  color: #38bdf8;
+  color: #4d0ab9;
   font-weight: 600;
   margin-top: 0.25rem;
 }
@@ -1292,7 +1286,7 @@ body.default-bg {
 .weather-location-label {
   font-size: 0.75rem;
   color: #94a3b8;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
 }
 
 .weather-metrics-grid {
@@ -1319,16 +1313,16 @@ body.default-bg {
 }
 
 .metric-val {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.92rem;
   font-weight: 800;
   color: #ffffff;
 }
 
 .weather-forecast-heading {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.9rem;
-  color: #38bdf8;
+  color: #4d0ab9;
   margin: 0.25rem 0 0.5rem;
 }
 
@@ -1351,7 +1345,7 @@ body.default-bg {
 }
 
 .forecast-day-name {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.78rem;
   font-weight: 700;
   color: #cbd5e1;
@@ -1377,7 +1371,7 @@ body.default-bg {
 }
 
 .forecast-hi-lo {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.85rem;
   font-weight: 700;
   color: #ffffff;
@@ -1385,7 +1379,7 @@ body.default-bg {
 
 .forecast-rain {
   font-size: 0.72rem;
-  color: #38bdf8;
+  color: #4d0ab9;
   font-weight: 600;
 }
 
@@ -1415,14 +1409,14 @@ body.default-bg {
 }
 
 .drawer-header h2 {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 1.15rem;
   margin: 0 0 0.3rem 0;
-  color: #38bdf8;
+  color: #4d0ab9;
 }
 
 .drawer-header .photo-date {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.75rem;
   color: #94a3b8;
 }
@@ -1435,10 +1429,10 @@ body.default-bg {
 }
 
 .btn-space-action {
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid #38bdf8;
-  color: #38bdf8;
-  font-family: 'Orbitron', sans-serif;
+  background: rgba(77, 10, 185, 0.15);
+  border: 1px solid #4d0ab9;
+  color: #4d0ab9;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 6px 12px;
@@ -1449,19 +1443,19 @@ body.default-bg {
 }
 
 .btn-space-action:hover {
-  background: #38bdf8;
+  background: #4d0ab9;
   color: #08090e;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 15px rgba(77, 10, 185, 0.4);
 }
 
 .btn-space-action.active {
-  background: #22c55e;
-  border-color: #22c55e;
+  background: #4d0ab9;
+  border-color: #4d0ab9;
   color: #ffffff;
 }
 
 .video-wallpaper-notice {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.72rem;
   font-weight: 600;
   color: #f59e0b;
@@ -1507,7 +1501,7 @@ body.default-bg {
 }
 
 .status-msg {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Garamond', sans-serif;
   font-size: 0.85rem;
   color: #94a3b8;
   text-align: center;

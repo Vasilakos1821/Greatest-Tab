@@ -1,19 +1,15 @@
 # 🌌 Greatest Tab
 
-> A fast, zero-bloat browser New Tab dashboard packed with productivity tools, music, live space photos and more!
+> A nice New Tab that has everything you might need!
 
-[![Live Demo](https://img.shields.io/badge/demo-live%20site-38bdf8?style=for-the-badge&logo=githubpages&logoColor=white)](https://vasilakos1821.github.io/Greatest-Tab/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 ---
 
-## 🚀 Setup
+##  Setup
 
 Make **Greatest Tab** your default browser page in less than a minute:
 
-1. Install a lightweight new tab redirect extension for your browser:
+1. Install a new tab redirect extension for your browser:
    * **Chrome / Brave / Edge:** [Custom New Tab URL](https://chromewebstore.google.com/detail/custom-new-tab-url/mmjbdbjnoablegbkcklggeknkfcjkjia) or [New Tab Redirect](https://chromewebstore.google.com/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna)
    * **Firefox:** [New Tab Override](https://addons.mozilla.org/en-US/firefox/addon/new-tab-override/)
 2. Set the redirect URL to:
@@ -23,47 +19,43 @@ Make **Greatest Tab** your default browser page in less than a minute:
 
 
 
-## ⚡ Overview
+##  Overview
 
-**Greatest Tab** transforms your browser's default blank page into a customizable dashborad. Built entirely with Vanilla JavaScript and Vite, it requires **no account creation, no databases, and no OAuth permissions**. All your data stays right inside your browser's `localStorage`.
+**Greatest Tab** is just like your classic New Tab on your browser but better because it's full of tools that just make your life easier!
 
 
-## ✨ Features
+##  Features
 
-### 🕰️ Dual Clock System
+###  Dual Clock System
 * Choose between a digital 24hr clock or an old school analog one!
-* **Quick Toggle**: Press <kbd>C</kbd> or click the switcher in the top-left to swap modes instantly.
 
-### 📝 Draggable Sticky Notes
-* Create as many floating notes as you need with <kbd>N</kbd> or the top-right button.
-* Drag-and-drop to position notes anywhere on your screen.
-* Auto-saves everything locally as you type.
+###  Draggable Sticky Notes
+* Create as many floating notes as you need with <kbd>N</kbd> or the top-right button and put them wherever you wish.
 
-### 🔗 Customizable Shortcuts Bar
+### Shortcuts Bar
 * 5 slots that are easily customizable and draggable!
-* Edit URLs and display labels on the fly via the slot options menu.
 * Quick-launch sites with number keys <kbd>1</kbd> through <kbd>5</kbd>.
 
-### 📅 Calendar & Local `.ics` Import
-* Full monthly calendar view accessible right from the clock date.
-* Add daily tasks, schedule reminders, and color-coded event dots.
-* **Calendar Import**: One-click import for standard `.ics` files exported from any Calendar App!
+###  Calendar
+* View your calendar by clicking the date below the clock!
+* Add any event you might have!
+* Easily import your calendar by importing a .ics file.
 
-### 🖼️ Wallpaper & Daily Space Switcher
-* **Custom Backgrounds**: Customize your background with whatever picture you wish!
-* **NASA Wallpaper**: Toggle on NASA's Astronomy Picture of the Day to automatically update your wallpaper daily.
+###  Wallpaper
+* Choose any picture as your background.
+* **NASA Wallpaper**: If you really like space you can even put NASA's Astronomy Picture of the Day as your wallpaper with an easy toggle!
 
 
-## 🗂️ 4-in-1 Bottom Slide-Up Dock
+##  Bottom Tabs
 
 Press the hotkeys or click the drawer tabs at the bottom to slide out dedicated media and utility panels:
 
 | Tab | Hotkey | Description |
 | :--- | :---: | :--- |
-| **🎵 Spotify** | <kbd>M</kbd> | Embed player with 5 presets (*Lo-Fi, Top Hits, Deep Focus, Synthwave, Rock*) and link/URL parsing |
-| **🔭 NASA Space** | <kbd>A</kbd> | Official NASA APOD integration. Read the daily cosmic breakdown, roll for a random surprise article, or set the current photo as your wallpaper. |
-| **📰 Live News** | <kbd>W</kbd> | Real-time live News powered by direct news feeds across 6 categories: *General, Finance, Tech, Entertainment, Science, and Sports*. |
-| **🌦️ Weather** | <kbd>E</kbd> | Weather tab that displays current temp, feels-like, wind speed, humidity, precipitation chance, and a full 5-day daily forecast. |
+| ** Spotify** | <kbd>M</kbd> | Embed player that includes 5 presets and also allows you to put your own spotify playlists or songs by pasting their link! |
+| ** NASA Space** | <kbd>A</kbd> | Read the daily astronomy article , click for a random surprise article , or set the current photo as your wallpaper. |
+| ** Live News** | <kbd>W</kbd> | Live News tab that spans across 6 categories: *General, Finance, Tech, Entertainment, Science, and Sports*. |
+| ** Weather** | <kbd>E</kbd> | Weather tab that displays current temp, feels-like, wind speed, humidity, precipitation chance, and a full 5-day daily forecast. |
 
 
 ## ⌨️ Keyboard Shortcuts
@@ -84,9 +76,8 @@ Press the hotkeys or click the drawer tabs at the bottom to slide out dedicated 
 
 ## 🛠️ Tech Stack
 
-* **Build Tool:** [Vite](https://vitejs.dev/)
-* **Languages:** Vanilla JS, HTML, CSS
-* **APIs Used (No Auth / Free Tier):**
+* **Languages I used:** JS, HTML, CSS
+* **APIs Used:**
   * [Open-Meteo](https://open-meteo.com/) – Hourly and 5-day weather data
   * [NASA APOD API](https://api.nasa.gov/) – Daily cosmic photography & details
   * [BBC News Feeds via rss2json](https://rss2json.com/) – Categorized live headlines
@@ -95,9 +86,7 @@ Press the hotkeys or click the drawer tabs at the bottom to slide out dedicated 
 
 ## 🔒 Privacy & Data Policy
 
-* **100% Client-Side:** There is no backend server collecting your usage statistics, IP, or link clicks.
-* **Local Storage:** Sticky notes, shortcuts, calendar events, active presets, and custom wallpapers live exclusively in your local browser storage.
-* **On-Demand Location:** Weather information only checks coordinates when the tab is accessed.
+* **NO COLLECTION OF DATA:** I have no access to whatever information you put, everything is saved on your browser's local storage.
 
 
 ## 📄 License

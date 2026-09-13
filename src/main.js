@@ -200,7 +200,7 @@ function renderNoteElement(note) {
     <div class="sticky-note-header" title="Drag to reposition">
       <div class="drag-indicator">
         <span class="drag-dots">⋮⋮</span>
-        <span>📝 Quick Note</span>
+        <span>Quick Note</span>
       </div>
       <div class="sticky-note-actions">
         <button class="btn-delete-note" type="button" title="Delete note">✕</button>
