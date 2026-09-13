@@ -58,7 +58,7 @@ Press the hotkeys or click the drawer tabs at the bottom to slide out dedicated 
 | **Weather** | <kbd>E</kbd> | Weather tab that displays current temp, feels-like, wind speed, humidity, precipitation chance, and a full 5-day daily forecast. |
 
 
-## ⌨️ Keyboard Shortcuts
+##  Keyboard Shortcuts
 
 | Key | Action |
 | :---: | :--- |
