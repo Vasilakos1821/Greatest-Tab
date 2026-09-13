@@ -1,4 +1,4 @@
-# 🌌 Greatest Tab
+#  Greatest Tab
 
 > A nice New Tab that has everything you might need!
 
@@ -74,7 +74,7 @@ Press the hotkeys or click the drawer tabs at the bottom to slide out dedicated 
 | <kbd>Esc</kbd> | Close all active modals, drawers, and open menus |
 
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 * **Languages I used:** JS, HTML, CSS
 * **APIs Used:**
@@ -84,11 +84,11 @@ Press the hotkeys or click the drawer tabs at the bottom to slide out dedicated 
   * [BigDataCloud](https://www.bigdatacloud.com/) – Client-side reverse geocoding
 
 
-## 🔒 Privacy & Data Policy
+##  Privacy & Data Policy
 
 * **NO COLLECTION OF DATA:** I have no access to whatever information you put, everything is saved on your browser's local storage.
 
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
